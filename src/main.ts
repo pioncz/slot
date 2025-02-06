@@ -5,12 +5,15 @@ import {
   Container,
   Graphics,
   Sprite,
+  TextStyle,
   Texture,
+  Text,
 } from 'pixi.js';
 import './style.css';
-import { createGradient, Reel } from './helpers';
+import { createGradient, FontStyle, Reel, State } from './helpers';
 
 const main = async () => {
+  let state = State.initial;
   const app = new Application();
   const WIDTH = window.innerWidth;
   const HEIGHT = window.innerHeight;
@@ -114,6 +117,54 @@ const main = async () => {
     reelContainer.y = HEIGHT / 2 - reelHeight / 2;
     reelContainer.x = WIDTH / 2 - reelWidth / 2;
     app.stage.addChild(reelContainer);
+
+    const headerFill = createGradient([0xffffff, 0x00e4ff], 0, 50);
+    const headerStyle = new TextStyle({
+      ...FontStyle,
+      fontSize: 44,
+      fill: { fill: headerFill },
+    });
+    const headerText = new Text({
+      text: 'RAPID SLOT!',
+      style: headerStyle,
+      anchor: { x: 0.5, y: 0.5 },
+    });
+    headerText.x = WIDTH / 2;
+    headerText.y = (HEIGHT - REEL_WIDTH * 3) / 4;
+    app.stage.addChild(headerText);
+
+    const playFill = createGradient([0xffffff, 0x00ff46], 0, 50);
+    const playStyle = new TextStyle({
+      ...FontStyle,
+      fontSize: 30,
+      fill: { fill: playFill },
+    });
+    const playText = new Text({
+      text: 'PLAY!',
+      style: playStyle,
+      anchor: { x: 0.5, y: 0.5 },
+    });
+    playText.x = WIDTH / 2;
+    playText.y = HEIGHT - (HEIGHT - REEL_WIDTH * 3) / 4;
+    playText.eventMode = 'static';
+    playText.cursor = 'pointer';
+    app.stage.addChild(playText);
+
+    const stateStyle = new TextStyle({
+      fontFamily: 'Arial',
+      fontSize: 16,
+      fill: '#fff',
+      align: 'right',
+      wordWrapWidth: 440,
+    });
+    const stateText = new Text({
+      text: state,
+      style: stateStyle,
+      anchor: { x: 1, y: 1 },
+    });
+    stateText.x = app.screen.width;
+    stateText.y = app.screen.height;
+    app.stage.addChild(stateText);
   };
 
   await load();
