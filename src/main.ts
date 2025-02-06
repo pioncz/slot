@@ -18,6 +18,7 @@ import {
   State,
   Animation,
   animate,
+  Easings,
 } from './helpers';
 
 const main = async () => {
@@ -201,6 +202,7 @@ const main = async () => {
         property: 'position',
         endValue,
         duration,
+        easing: Easings.backout,
         onComplete: () => {
           r.spinning = false;
 

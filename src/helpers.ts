@@ -31,6 +31,7 @@ export type Animation = {
   endValue: number;
   duration: number;
   startTime: number;
+  easing: (t: number) => number;
   onComplete?: (a: Animation) => void;
 };
 
@@ -72,12 +73,14 @@ export const createAnimation = ({
   property,
   endValue,
   duration,
+  easing,
   onComplete,
 }: {
   object: any;
   property: string;
   endValue: number;
   duration: number;
+  easing: (t: number) => number;
   onComplete?: () => void;
 }) => ({
   object,
@@ -86,6 +89,7 @@ export const createAnimation = ({
   duration,
   startValue: object[property],
   startTime: Date.now(),
+  easing,
   onComplete,
 });
 
@@ -93,7 +97,11 @@ export const animate = (now: number, a: Animation) => {
   const progress = Math.min(1, (now - a.startTime) / a.duration);
   let finished = false;
 
-  a.object[a.property] = lerp(a.startValue, a.endValue, progress);
+  a.object[a.property] = lerp(
+    a.startValue,
+    a.endValue,
+    a.easing(progress),
+  );
   if (progress === 1) {
     finished = true;
     a.object[a.property] = a.endValue;
@@ -102,4 +110,8 @@ export const animate = (now: number, a: Animation) => {
   }
 
   return finished;
+};
+
+export const Easings = {
+  backout: (t: number) => --t * t * (1.5 * t + 0.5) + 1,
 };
