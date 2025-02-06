@@ -10,7 +10,15 @@ import {
   Text,
 } from 'pixi.js';
 import './style.css';
-import { createGradient, FontStyle, Reel, State } from './helpers';
+import {
+  createAnimation,
+  createGradient,
+  FontStyle,
+  Reel,
+  State,
+  Animation,
+  animate,
+} from './helpers';
 
 const main = async () => {
   let state = State.initial;
@@ -23,8 +31,10 @@ const main = async () => {
   const REEL_WIDTH = (DIMENSION - 2 * MARGIN) / REEL_COLUMNS;
   const REEL_MARGINS = MARGIN / 4;
   const SYMBOL_SIZE = 96;
+  const animations: Animation[] = [];
   let slotTextures: Texture[] = [];
   let reels: Reel[] = [];
+  let stateText: Text;
 
   const load = async () => {
     await app.init({ backgroundAlpha: 0, resizeTo: window });
@@ -91,7 +101,10 @@ const main = async () => {
       const reel: Reel = {
         container: rc,
         symbols: [],
+        position: 0,
+        prevPosition: 0,
         blur: new BlurFilter(),
+        spinning: false,
       };
 
       reel.blur.strength = 0;
@@ -148,6 +161,9 @@ const main = async () => {
     playText.y = HEIGHT - (HEIGHT - REEL_WIDTH * 3) / 4;
     playText.eventMode = 'static';
     playText.cursor = 'pointer';
+    playText.addListener('pointerdown', () => {
+      start();
+    });
     app.stage.addChild(playText);
 
     const stateStyle = new TextStyle({
@@ -157,7 +173,7 @@ const main = async () => {
       align: 'right',
       wordWrapWidth: 440,
     });
-    const stateText = new Text({
+    stateText = new Text({
       text: state,
       style: stateStyle,
       anchor: { x: 1, y: 1 },
@@ -167,8 +183,80 @@ const main = async () => {
     app.stage.addChild(stateText);
   };
 
+  const start = () => {
+    if (state === State.spinning) {
+      return;
+    }
+    setState(State.spinning);
+
+    reels.forEach((r, i) => {
+      const extra = Math.floor(Math.random() * 3);
+      const endValue = r.position + 10 + i * 5 + extra;
+      const duration = 250 + i * 60 + extra * 300;
+
+      r.spinning = true;
+
+      const animation = createAnimation({
+        object: r,
+        property: 'position',
+        endValue,
+        duration,
+        onComplete: () => {
+          r.spinning = false;
+
+          if (reels.every((r) => r.spinning === false)) {
+            setState(State.initial);
+          }
+        },
+      });
+      animations.push(animation);
+    });
+  };
+
+  const setState = (newState: State) => {
+    state = newState;
+    stateText.text = newState;
+  };
+
   await load();
   initStage();
+
+  app.ticker.add(() => {
+    const now = Date.now();
+    const toRemove = [];
+
+    for (let i = 0; i < animations.length; i++) {
+      const finished = animate(now, animations[i]);
+      if (finished) toRemove.push(animations[i]);
+    }
+
+    for (let i = 0; i < toRemove.length; i++) {
+      animations.splice(animations.indexOf(toRemove[i]), 1);
+    }
+
+    for (let i = 0; i < reels.length; i++) {
+      const r = reels[i];
+
+      r.blur.strengthY = r.position - r.prevPosition;
+      r.prevPosition = r.position;
+
+      for (let j = 0; j < r.symbols.length; j++) {
+        const s = r.symbols[j];
+        const prevy = s.y;
+
+        s.y =
+          (((r.position + j) % r.symbols.length) - 1) *
+            (REEL_WIDTH - REEL_MARGINS) +
+          REEL_MARGINS;
+        if (s.y < 0 && prevy > SYMBOL_SIZE) {
+          s.texture =
+            slotTextures[
+              Math.floor(Math.random() * slotTextures.length)
+            ];
+        }
+      }
+    }
+  });
 };
 
 main();
