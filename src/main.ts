@@ -20,6 +20,7 @@ import {
   animate,
   Easings,
 } from './helpers';
+import WebFont from 'webfontloader';
 
 const main = async () => {
   let state = State.initial;
@@ -38,18 +39,29 @@ const main = async () => {
   let stateText: Text;
 
   const load = async () => {
+    const loadFontPromise = new Promise((resolve) => {
+      WebFont.load({
+        active: function () {
+          resolve(null);
+        },
+        google: {
+          families: ['Trade Winds'],
+        },
+      });
+    });
     await app.init({ backgroundAlpha: 0, resizeTo: window });
     await Assets.load([
-      '/slot-symbol1.png',
-      '/slot-symbol2.png',
-      '/slot-symbol3.png',
+      'slot-symbol1.png',
+      'slot-symbol2.png',
+      'slot-symbol3.png',
     ]);
     slotTextures = [
-      Texture.from('/slot-symbol1.png'),
-      Texture.from('/slot-symbol2.png'),
-      Texture.from('/slot-symbol3.png'),
+      Texture.from('slot-symbol2.png'),
+      Texture.from('slot-symbol1.png'),
+      Texture.from('slot-symbol3.png'),
     ];
     document.body.appendChild(app.canvas);
+    await loadFontPromise;
   };
 
   const initStage = () => {

@@ -9,10 +9,12 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/webfontloader": "^1.6.38",
     "typescript": "~5.6.2",
     "vite": "^6.0.5"
   },
   "dependencies": {
-    "pixi.js": "^8.7.3"
+    "pixi.js": "^8.7.3",
+    "webfontloader": "typekit/webfontloader"
   }
 }
