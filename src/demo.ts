@@ -69,41 +69,48 @@ function drawMap() {
     for (let x = 0; x < WORLD_MAP[y].length; x++) {
       const tile = new Graphics();
 
+      // Set fill color based on tile type
+      let fillColor;
       switch (WORLD_MAP[y][x]) {
         case 0: // Grass (walkable)
-          tile.beginFill(0x408040);
+          fillColor = 0x408040;
           break;
         case 1: // Wall (obstacle)
-          tile.beginFill(0x808080);
+          fillColor = 0x808080;
           break;
         case 2: // Water (obstacle)
-          tile.beginFill(0x4040c0);
+          fillColor = 0x4040c0;
           break;
       }
 
-      tile.drawRect(0, 0, TILE_SIZE, TILE_SIZE);
-      tile.endFill();
+      // Use the new fill and rect methods from Pixi.js v8
+      tile.rect(0, 0, TILE_SIZE, TILE_SIZE);
+      tile.fill({ color: fillColor });
+
       tile.position.set(x * TILE_SIZE, y * TILE_SIZE);
       worldContainer.addChild(tile);
     }
   }
 }
 
-// Create player
 const player = new Graphics();
-updatePlayerGraphics();
-player.position.set(
-  playerState.x - PLAYER_SIZE / 2,
-  playerState.y - PLAYER_SIZE / 2,
-);
-worldContainer.addChild(player);
+function drawPlayer() {
+  // Create player
+  updatePlayerGraphics();
+  player.position.set(
+    playerState.x - PLAYER_SIZE / 2,
+    playerState.y - PLAYER_SIZE / 2,
+  );
+  worldContainer.addChild(player);
+}
 
 // Function to update player graphics based on movement state
 function updatePlayerGraphics() {
   player.clear();
-  player.beginFill(playerState.isMoving ? 0xffaa00 : 0xff0000);
-  player.drawRect(0, 0, PLAYER_SIZE, PLAYER_SIZE);
-  player.endFill();
+
+  // Use the new fill and rect methods
+  player.rect(0, 0, PLAYER_SIZE, PLAYER_SIZE);
+  player.fill({ color: playerState.isMoving ? 0xffaa00 : 0xff0000 });
 }
 
 // Input handling
@@ -236,6 +243,7 @@ app.ticker.add((time) => {
 // Initialize the game
 function init() {
   drawMap();
+  drawPlayer();
 
   // Find a valid starting position for the player
   for (let y = 0; y < WORLD_MAP.length; y++) {
