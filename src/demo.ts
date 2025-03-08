@@ -47,14 +47,17 @@ function drawMap() {
   for (let y = 0; y < MAP.length; y++) {
     for (let x = 0; x < MAP[y].length; x++) {
       const tile = new Graphics();
+
       if (MAP[y][x] === 0) {
         // Walkable tile (black)
-        tile.fill({ color: 0x000000 });
+        tile.beginFill(0x000000);
       } else {
         // Obstacle (white)
-        tile.fill({ color: 0xffffff });
+        tile.beginFill(0xffffff);
       }
-      tile.rect(0, 0, TILE_SIZE, TILE_SIZE);
+
+      tile.drawRect(0, 0, TILE_SIZE, TILE_SIZE);
+      tile.endFill();
       tile.position.set(x * TILE_SIZE, y * TILE_SIZE);
       mapContainer.addChild(tile);
     }
@@ -63,8 +66,9 @@ function drawMap() {
 
 // Create player
 const player = new Graphics();
-player.fill({ color: 0xff0000 });
-player.rect(0, 0, TILE_SIZE - 10, TILE_SIZE - 10);
+player.beginFill(0xff0000);
+player.drawRect(0, 0, TILE_SIZE - 10, TILE_SIZE - 10);
+player.endFill();
 player.position.set(TILE_SIZE / 2, TILE_SIZE / 2);
 
 // Add player to the stage
@@ -114,42 +118,42 @@ function isValidPosition(x: number, y: number): boolean {
 }
 
 // Game loop
-// app.ticker.add((time) => {
-//   // In Pixi.js v8, ticker provides a time delta object
-//   const delta = time.deltaTime;
+app.ticker.add((time) => {
+  // In Pixi.js v8, ticker provides a time delta object
+  const delta = time.deltaTime;
 
-//   let newX = player.x;
-//   let newY = player.y;
+  let newX = player.x;
+  let newY = player.y;
 
-//   // Handle movement
-//   if (keys['w'] || keys['arrowup']) {
-//     newY -= PLAYER_SPEED * delta;
-//   }
-//   if (keys['s'] || keys['arrowdown']) {
-//     newY += PLAYER_SPEED * delta;
-//   }
-//   if (keys['a'] || keys['arrowleft']) {
-//     newX -= PLAYER_SPEED * delta;
-//   }
-//   if (keys['d'] || keys['arrowright']) {
-//     newX += PLAYER_SPEED * delta;
-//   }
+  // Handle movement
+  if (keys['w'] || keys['arrowup']) {
+    newY -= PLAYER_SPEED * delta;
+  }
+  if (keys['s'] || keys['arrowdown']) {
+    newY += PLAYER_SPEED * delta;
+  }
+  if (keys['a'] || keys['arrowleft']) {
+    newX -= PLAYER_SPEED * delta;
+  }
+  if (keys['d'] || keys['arrowright']) {
+    newX += PLAYER_SPEED * delta;
+  }
 
-//   // Get player bounds for collision
-//   const playerWidth = player.width;
-//   const playerHeight = player.height;
+  // Get player bounds for collision
+  const playerWidth = player.width;
+  const playerHeight = player.height;
 
-//   // Check if new position is valid before updating
-//   if (
-//     isValidPosition(newX, newY) &&
-//     isValidPosition(newX + playerWidth, newY) &&
-//     isValidPosition(newX, newY + playerHeight) &&
-//     isValidPosition(newX + playerWidth, newY + playerHeight)
-//   ) {
-//     player.x = newX;
-//     player.y = newY;
-//   }
-// });
+  // Check if new position is valid before updating
+  if (
+    isValidPosition(newX, newY) &&
+    isValidPosition(newX + playerWidth, newY) &&
+    isValidPosition(newX, newY + playerHeight) &&
+    isValidPosition(newX + playerWidth, newY + playerHeight)
+  ) {
+    player.x = newX;
+    player.y = newY;
+  }
+});
 
 // Initialize the game
 function init() {
