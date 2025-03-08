@@ -1,4 +1,10 @@
-import * as PIXI from 'pixi.js';
+import {
+  Application,
+  Container,
+  Graphics,
+  Sprite,
+  Texture,
+} from 'pixi.js';
 
 // Define map: 0 = walkable (black), 1 = obstacle (white)
 const MAP = [
@@ -18,33 +24,37 @@ const MAP = [
 const TILE_SIZE = 50;
 const PLAYER_SPEED = 5;
 
-// Initialize Pixi Application
-const app = new PIXI.Application({
+// Initialize Pixi Application with the correct Pixi.js v8 pattern
+const app = new Application();
+
+// Initialize the app with proper options
+await app.init({
   width: MAP[0].length * TILE_SIZE,
   height: MAP.length * TILE_SIZE,
-  backgroundColor: 0x333333,
+  background: '#333333',
   antialias: true,
 });
-document.body.appendChild(app.view as HTMLCanvasElement);
+
+// Add the canvas to the document
+document.body.appendChild(app.canvas);
 
 // Create map container
-const mapContainer = new PIXI.Container();
+const mapContainer = new Container();
 app.stage.addChild(mapContainer);
 
 // Draw map
 function drawMap() {
   for (let y = 0; y < MAP.length; y++) {
     for (let x = 0; x < MAP[y].length; x++) {
-      const tile = new PIXI.Graphics();
+      const tile = new Graphics();
       if (MAP[y][x] === 0) {
         // Walkable tile (black)
-        tile.beginFill(0x000000);
+        tile.fill({ color: 0x000000 });
       } else {
         // Obstacle (white)
-        tile.beginFill(0xffffff);
+        tile.fill({ color: 0xffffff });
       }
-      tile.drawRect(0, 0, TILE_SIZE, TILE_SIZE);
-      tile.endFill();
+      tile.rect(0, 0, TILE_SIZE, TILE_SIZE);
       tile.position.set(x * TILE_SIZE, y * TILE_SIZE);
       mapContainer.addChild(tile);
     }
@@ -52,12 +62,9 @@ function drawMap() {
 }
 
 // Create player
-const player = new PIXI.Graphics();
-player.beginFill(0xff0000);
-player.drawRect(0, 0, TILE_SIZE - 10, TILE_SIZE - 10);
-player.endFill();
-
-// Center the player in the tile
+const player = new Graphics();
+player.fill({ color: 0xff0000 });
+player.rect(0, 0, TILE_SIZE - 10, TILE_SIZE - 10);
 player.position.set(TILE_SIZE / 2, TILE_SIZE / 2);
 
 // Add player to the stage
@@ -65,7 +72,9 @@ app.stage.addChild(player);
 
 /* 
 // Replace the rectangle with an image (commented out)
-const player = PIXI.Sprite.from('player.png');
+// In Pixi.js v8+, we create a Sprite from a Texture
+const playerTexture = await Texture.from('player.png');
+const player = new Sprite(playerTexture);
 player.width = TILE_SIZE - 10;
 player.height = TILE_SIZE - 10;
 player.anchor.set(0.5);
@@ -105,35 +114,42 @@ function isValidPosition(x: number, y: number): boolean {
 }
 
 // Game loop
-app.ticker.add((delta) => {
-  let newX = player.x;
-  let newY = player.y;
+// app.ticker.add((time) => {
+//   // In Pixi.js v8, ticker provides a time delta object
+//   const delta = time.deltaTime;
 
-  // Handle movement
-  if (keys['w'] || keys['arrowup']) {
-    newY -= PLAYER_SPEED * delta;
-  }
-  if (keys['s'] || keys['arrowdown']) {
-    newY += PLAYER_SPEED * delta;
-  }
-  if (keys['a'] || keys['arrowleft']) {
-    newX -= PLAYER_SPEED * delta;
-  }
-  if (keys['d'] || keys['arrowright']) {
-    newX += PLAYER_SPEED * delta;
-  }
+//   let newX = player.x;
+//   let newY = player.y;
 
-  // Check if new position is valid before updating
-  if (
-    isValidPosition(newX, newY) &&
-    isValidPosition(newX + player.width, newY) &&
-    isValidPosition(newX, newY + player.height) &&
-    isValidPosition(newX + player.width, newY + player.height)
-  ) {
-    player.x = newX;
-    player.y = newY;
-  }
-});
+//   // Handle movement
+//   if (keys['w'] || keys['arrowup']) {
+//     newY -= PLAYER_SPEED * delta;
+//   }
+//   if (keys['s'] || keys['arrowdown']) {
+//     newY += PLAYER_SPEED * delta;
+//   }
+//   if (keys['a'] || keys['arrowleft']) {
+//     newX -= PLAYER_SPEED * delta;
+//   }
+//   if (keys['d'] || keys['arrowright']) {
+//     newX += PLAYER_SPEED * delta;
+//   }
+
+//   // Get player bounds for collision
+//   const playerWidth = player.width;
+//   const playerHeight = player.height;
+
+//   // Check if new position is valid before updating
+//   if (
+//     isValidPosition(newX, newY) &&
+//     isValidPosition(newX + playerWidth, newY) &&
+//     isValidPosition(newX, newY + playerHeight) &&
+//     isValidPosition(newX + playerWidth, newY + playerHeight)
+//   ) {
+//     player.x = newX;
+//     player.y = newY;
+//   }
+// });
 
 // Initialize the game
 function init() {
