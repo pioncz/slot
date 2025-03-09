@@ -335,78 +335,72 @@ function findPath(startX: number, startY: number, targetX: number, targetY: numb
 
 // Game loop
 app.ticker.add((time) => {
-  // Update player movement based on keyboard input
-  if (keys.up) {
-    playerState.targetGridY = playerState.gridY - 1;
-    playerState.direction = 'north';
-  } else if (keys.down) {
-    playerState.targetGridY = playerState.gridY + 1;
-    playerState.direction = 'south';
-  }
-
-  if (keys.left) {
-    playerState.targetGridX = playerState.gridX - 1;
-    playerState.direction = 'west';
-  } else if (keys.right) {
-    playerState.targetGridX = playerState.gridX + 1;
-    playerState.direction = 'east';
-  }
-
-  // Check if target is valid
-  if (!isWalkableTile(playerState.targetGridX, playerState.targetGridY)) {
-    playerState.targetGridX = playerState.gridX;
-    playerState.targetGridY = playerState.gridY;
-  }
-
-  // Calculate iso coordinates for current and target positions
-  const currentIso = gridToIso(playerState.gridX, playerState.gridY);
-  const targetIso = gridToIso(playerState.targetGridX, playerState.targetGridY);
+  // Reset movement flag at the start of each frame
+  playerState.isMoving = false;
   
-  // Move player towards target
-  const dx = targetIso.x - currentIso.x;
-  const dy = targetIso.y - currentIso.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  if (distance > 1) {
-    // Player is moving
+  // Calculate potential new position based on direct keyboard input
+  let moveX = 0;
+  let moveY = 0;
+  
+  // Determine movement direction based on keys
+  if (keys.up) {
+    moveY = -1;
+    playerState.direction = 'north';
     playerState.isMoving = true;
-
-    // Calculate movement vector
-    const vx = (dx / distance) * PLAYER_SPEED;
-    const vy = (dy / distance) * PLAYER_SPEED;
-    
-    // Update player iso position
-    playerState.x += vx;
-    playerState.y += vy;
-    
-    // Update grid position based on iso position
-    const grid = isoToGrid(playerState.x, playerState.y);
-    playerState.gridX = grid.gridX;
-    playerState.gridY = grid.gridY;
-    
-    // Update animation frame every few ticks
-    if (time.deltaTime % 10 < 1) {
-      playerState.animationFrame = (playerState.animationFrame + 1) % 4;
-    }
-    
-    // Update player direction
-    playerState.direction = calculateDirection(
-      currentIso.x, currentIso.y,
-      targetIso.x, targetIso.y
-    );
-
-    // Update player visual
-    updatePlayerGraphics();
-  } else if (distance > 0) {
-    // Snap to target when very close
-    playerState.x = targetIso.x;
-    playerState.y = targetIso.y;
-    playerState.gridX = playerState.targetGridX;
-    playerState.gridY = playerState.targetGridY;
-    playerState.isMoving = false;
+  } else if (keys.down) {
+    moveY = 1;
+    playerState.direction = 'south';
+    playerState.isMoving = true;
+  }
+  
+  if (keys.left) {
+    moveX = -1;
+    playerState.direction = 'west';
+    playerState.isMoving = true;
+  } else if (keys.right) {
+    moveX = 1;
+    playerState.direction = 'east';
+    playerState.isMoving = true;
+  }
+  
+  // If there's no movement input, character stops immediately
+  if (!playerState.isMoving) {
+    // Update player visual to stopped state
     updatePlayerGraphics();
   } else {
-    playerState.isMoving = false;
+    // Calculate the isometric movement vector
+    // In isometric view, moving diagonally requires special handling
+    let isoMoveX = (moveX - moveY) * PLAYER_SPEED;
+    let isoMoveY = (moveX + moveY) * PLAYER_SPEED / 2;
+    
+    // Calculate potential new position
+    const newX = playerState.x + isoMoveX;
+    const newY = playerState.y + isoMoveY;
+    
+    // Convert to grid coordinates to check if valid
+    const newGrid = isoToGrid(newX, newY);
+    
+    // If the new position is valid, move there
+    if (isWalkableTile(newGrid.gridX, newGrid.gridY)) {
+      playerState.x = newX;
+      playerState.y = newY;
+      
+      // Update grid position based on iso position
+      playerState.gridX = newGrid.gridX;
+      playerState.gridY = newGrid.gridY;
+      
+      // Update animation frame every few ticks
+      if (time.deltaTime % 10 < 1) {
+        playerState.animationFrame = (playerState.animationFrame + 1) % 4;
+      }
+      
+      // Update player visual
+      updatePlayerGraphics();
+    } else {
+      // We hit a wall, stop moving
+      playerState.isMoving = false;
+      updatePlayerGraphics();
+    }
   }
 
   // Update player sprite position
