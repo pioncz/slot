@@ -7,6 +7,7 @@ import {
   Assets,
   FederatedPointerEvent,
 } from 'pixi.js';
+import './style.css';
 
 const round = (num, places) =>
   Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
@@ -57,7 +58,9 @@ await app.init({
 });
 
 // Add the canvas to the document
-document.body.appendChild(app.canvas);
+(document.getElementById('app') || document.body).appendChild(
+  app.canvas,
+);
 
 // Create world container (which will be moved to simulate camera)
 const worldContainer = new Container();

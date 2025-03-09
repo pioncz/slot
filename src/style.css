@@ -21,3 +21,15 @@ body {
   min-height: 100vh;
   background: url('/background.jpg');
 }
+
+#app::after {
+  content: '""';
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+}
