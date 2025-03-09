@@ -8,6 +8,9 @@ import {
   FederatedPointerEvent,
 } from 'pixi.js';
 
+const round = (num, places) =>
+  Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+
 // Define map: 0 = walkable (grass), 1 = obstacle (wall), 2 = water
 const WORLD_MAP = [
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -426,7 +429,13 @@ app.ticker.add((time) => {
 
     // Debug the proposed movement
     console.log(
-      `Attempting to move from (${playerState.gridX},${playerState.gridY}) to (${newGridX},${newGridY})`,
+      `Attempting to move from (${round(
+        playerState.gridX,
+        2,
+      )}, ${round(playerState.gridY, 2)}) to (${round(
+        newGridX,
+        2,
+      )},${round(newGridY, 2)})`,
     );
     console.log(
       `Tile at destination: ${
