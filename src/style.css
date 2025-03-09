@@ -22,6 +22,14 @@ body {
   background: url('/background.jpg');
 }
 
+#app {
+  position: relative;
+}
+
+#app canvas {
+  display: block;
+}
+
 #app::after {
   content: '""';
   display: block;
