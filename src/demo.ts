@@ -327,9 +327,11 @@ function isWalkableTile(gridX: number, gridY: number): boolean {
   ) {
     return false;
   }
+  const gridXDec = Math.floor(gridX);
+  const gridYDec = Math.floor(gridY);
 
   // Check if tile is walkable (0)
-  return WORLD_MAP[gridY][gridX] === 0;
+  return WORLD_MAP[gridYDec][gridXDec] === 0;
 }
 
 // Additional helper for debugging collision
@@ -426,9 +428,9 @@ app.ticker.add((time) => {
     console.log(
       `Attempting to move from (${playerState.gridX},${playerState.gridY}) to (${newGridX},${newGridY})`,
     );
-    console.log(
-      `Tile at destination: ${WORLD_MAP[newGridY][newGridX]}`,
-    );
+    // console.log(
+    //   `Tile at destination: ${WORLD_MAP[newGridY][newGridX]}`,
+    // );
 
     // Check if the new grid position is valid
     if (isWalkableTile(newGridX, newGridY)) {
