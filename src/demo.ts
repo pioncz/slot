@@ -99,9 +99,9 @@ function gridToIso(gridX: number, gridY: number): { x: number, y: number } {
 
 // Function to convert isometric screen coordinates to grid coordinates
 function isoToGrid(x: number, y: number): { gridX: number, gridY: number } {
-  // This is an approximation and may need adjustment for precise clicking
-  const gridX = Math.round((x / (TILE_WIDTH / 2) + y / (TILE_HEIGHT / 2)) / 2);
-  const gridY = Math.round((y / (TILE_HEIGHT / 2) - x / (TILE_WIDTH / 2)) / 2);
+  // More accurate conversion for isometric coordinates
+  const gridX = Math.floor((x / (TILE_WIDTH / 2) + y / (TILE_HEIGHT / 2)) / 2);
+  const gridY = Math.floor((y / (TILE_HEIGHT / 2) - x / (TILE_WIDTH / 2)) / 2);
   return { gridX, gridY };
 }
 
@@ -313,6 +313,21 @@ function isWalkableTile(gridX: number, gridY: number): boolean {
   return WORLD_MAP[gridY][gridX] === 0;
 }
 
+// Additional helper for debugging collision
+function debugCollision(x: number, y: number) {
+  const debugMarker = new Graphics();
+  debugMarker.beginFill(0xff00ff);
+  debugMarker.drawCircle(0, 0, 5);
+  debugMarker.endFill();
+  debugMarker.position.set(x, y);
+  worldContainer.addChild(debugMarker);
+  
+  // Remove after a second
+  setTimeout(() => {
+    worldContainer.removeChild(debugMarker);
+  }, 1000);
+}
+
 // Calculate direction based on movement
 function calculateDirection(fromX: number, fromY: number, toX: number, toY: number): string {
   const dx = toX - fromX;
@@ -368,26 +383,30 @@ app.ticker.add((time) => {
     // Update player visual to stopped state
     updatePlayerGraphics();
   } else {
-    // Calculate the isometric movement vector
-    // In isometric view, moving diagonally requires special handling
-    let isoMoveX = (moveX - moveY) * PLAYER_SPEED;
-    let isoMoveY = (moveX + moveY) * PLAYER_SPEED / 2;
+    // Determine grid-level movement based on key presses
+    let newGridX = playerState.gridX;
+    let newGridY = playerState.gridY;
     
-    // Calculate potential new position
-    const newX = playerState.x + isoMoveX;
-    const newY = playerState.y + isoMoveY;
+    // Simple direct grid movement
+    if (moveX > 0) newGridX += 1;
+    if (moveX < 0) newGridX -= 1;
+    if (moveY > 0) newGridY += 1;
+    if (moveY < 0) newGridY -= 1;
     
-    // Convert to grid coordinates to check if valid
-    const newGrid = isoToGrid(newX, newY);
+    // Debug the proposed movement
+    console.log(`Attempting to move from (${playerState.gridX},${playerState.gridY}) to (${newGridX},${newGridY})`);
+    console.log(`Tile at destination: ${WORLD_MAP[newGridY][newGridX]}`);
     
-    // If the new position is valid, move there
-    if (isWalkableTile(newGrid.gridX, newGrid.gridY)) {
-      playerState.x = newX;
-      playerState.y = newY;
+    // Check if the new grid position is valid
+    if (isWalkableTile(newGridX, newGridY)) {
+      // Update grid position
+      playerState.gridX = newGridX;
+      playerState.gridY = newGridY;
       
-      // Update grid position based on iso position
-      playerState.gridX = newGrid.gridX;
-      playerState.gridY = newGrid.gridY;
+      // Update isometric position based on the grid
+      const isoPos = gridToIso(playerState.gridX, playerState.gridY);
+      playerState.x = isoPos.x;
+      playerState.y = isoPos.y;
       
       // Update animation frame every few ticks
       if (time.deltaTime % 10 < 1) {
@@ -423,29 +442,52 @@ function sortObjectsByDepth() {
 
 // Initialize the game
 function init() {
+  // Draw map first
   drawMap();
-  createPlayer();
-
-  // Find a valid starting position for the player
-  for (let y = 0; y < WORLD_MAP.length; y++) {
-    for (let x = 0; x < WORLD_MAP[y].length; x++) {
-      if (WORLD_MAP[y][x] === 0) {
-        playerState.gridX = x;
-        playerState.gridY = y;
-        playerState.targetGridX = x;
-        playerState.targetGridY = y;
-        
-        // Calculate isometric coordinates
-        const iso = gridToIso(x, y);
-        playerState.x = iso.x;
-        playerState.y = iso.y;
-        
-        // Position player sprite
-        player.position.set(playerState.x, playerState.y - PLAYER_HEIGHT + TILE_HEIGHT / 2);
-        return;
+  
+  // Set a guaranteed valid starting position
+  playerState.gridX = 5;
+  playerState.gridY = 5;
+  
+  // Check if this position is actually walkable
+  if (!isWalkableTile(playerState.gridX, playerState.gridY)) {
+    // Fallback: Search for the first walkable tile
+    let foundValidTile = false;
+    for (let y = 1; y < WORLD_MAP.length - 1; y++) {
+      for (let x = 1; x < WORLD_MAP[y].length - 1; x++) {
+        if (WORLD_MAP[y][x] === 0) {
+          console.log(`Found valid starting position at ${x},${y}`);
+          playerState.gridX = x;
+          playerState.gridY = y;
+          foundValidTile = true;
+          break;
+        }
       }
+      if (foundValidTile) break;
+    }
+    
+    // If still no valid tile found (extreme edge case)
+    if (!foundValidTile) {
+      console.error("No walkable tiles found in map!");
+      playerState.gridX = 1;
+      playerState.gridY = 1;
     }
   }
+  
+  // Ensure target matches current position
+  playerState.targetGridX = playerState.gridX;
+  playerState.targetGridY = playerState.gridY;
+  
+  // Calculate isometric coordinates from grid position
+  const iso = gridToIso(playerState.gridX, playerState.gridY);
+  playerState.x = iso.x;
+  playerState.y = iso.y;
+  
+  // Now create the player with the confirmed valid position
+  createPlayer();
+  
+  console.log(`Player starting at grid position: ${playerState.gridX},${playerState.gridY}`);
+  console.log(`Tile value at start position: ${WORLD_MAP[playerState.gridY][playerState.gridX]}`);
 }
 
 // Start the game
