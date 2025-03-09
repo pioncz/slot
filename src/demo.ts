@@ -33,12 +33,12 @@ const WORLD_MAP = [
 ];
 
 // Game constants
-const TILE_WIDTH = 64;  // Width of an isometric tile
+const TILE_WIDTH = 64; // Width of an isometric tile
 const TILE_HEIGHT = 32; // Height of an isometric tile
-const TILE_DEPTH = 32;  // Visual height of walls and objects
+const TILE_DEPTH = 32; // Visual height of walls and objects
 const PLAYER_WIDTH = 32;
 const PLAYER_HEIGHT = 48; // Taller for the character sprite
-const PLAYER_SPEED = 2;   // Reduced for isometric movement
+const PLAYER_SPEED = 0.1; // Reduced for isometric movement
 const VIEWPORT_WIDTH = 800;
 const VIEWPORT_HEIGHT = 600;
 
@@ -62,7 +62,7 @@ app.stage.addChild(worldContainer);
 
 // Create containers for different layers
 const groundLayer = new Container();
-const objectLayer = new Container(); 
+const objectLayer = new Container();
 const playerLayer = new Container();
 worldContainer.addChild(groundLayer);
 worldContainer.addChild(objectLayer);
@@ -72,13 +72,13 @@ worldContainer.addChild(playerLayer);
 const playerState = {
   gridX: 5, // Grid coordinates
   gridY: 5,
-  x: 0,    // Screen coordinates (will be calculated)
+  x: 0, // Screen coordinates (will be calculated)
   y: 0,
   targetGridX: 5,
   targetGridY: 5,
   isMoving: false,
   direction: 'south', // 'north', 'east', 'south', 'west'
-  animationFrame: 0
+  animationFrame: 0,
 };
 
 // Sprite textures for player (placeholder - you would load actual sprite sheets)
@@ -86,22 +86,32 @@ const playerTextures = {
   north: [],
   east: [],
   south: [],
-  west: []
+  west: [],
 };
 
 // Function to convert grid coordinates to isometric screen coordinates
-function gridToIso(gridX: number, gridY: number): { x: number, y: number } {
+function gridToIso(
+  gridX: number,
+  gridY: number,
+): { x: number; y: number } {
   return {
     x: (gridX - gridY) * (TILE_WIDTH / 2),
-    y: (gridX + gridY) * (TILE_HEIGHT / 2)
+    y: (gridX + gridY) * (TILE_HEIGHT / 2),
   };
 }
 
 // Function to convert isometric screen coordinates to grid coordinates
-function isoToGrid(x: number, y: number): { gridX: number, gridY: number } {
+function isoToGrid(
+  x: number,
+  y: number,
+): { gridX: number; gridY: number } {
   // More accurate conversion for isometric coordinates
-  const gridX = Math.floor((x / (TILE_WIDTH / 2) + y / (TILE_HEIGHT / 2)) / 2);
-  const gridY = Math.floor((y / (TILE_HEIGHT / 2) - x / (TILE_WIDTH / 2)) / 2);
+  const gridX = Math.floor(
+    (x / (TILE_WIDTH / 2) + y / (TILE_HEIGHT / 2)) / 2,
+  );
+  const gridY = Math.floor(
+    (y / (TILE_HEIGHT / 2) - x / (TILE_WIDTH / 2)) / 2,
+  );
   return { gridX, gridY };
 }
 
@@ -112,10 +122,10 @@ function drawMap() {
     for (let x = 0; x < WORLD_MAP[y].length; x++) {
       // Convert grid coordinates to isometric
       const { x: isoX, y: isoY } = gridToIso(x, y);
-      
+
       // Create tile graphic based on type
       const tile = new Graphics();
-      
+
       // Set fill color based on tile type
       let fillColor;
       switch (WORLD_MAP[y][x]) {
@@ -129,7 +139,7 @@ function drawMap() {
           fillColor = 0x4040c0;
           break;
       }
-      
+
       // Draw the isometric tile (diamond shape)
       tile.beginFill(fillColor);
       tile.moveTo(TILE_WIDTH / 2, 0);
@@ -138,16 +148,17 @@ function drawMap() {
       tile.lineTo(0, TILE_HEIGHT / 2);
       tile.closePath();
       tile.endFill();
-      
+
       // Position the tile
       tile.position.set(isoX, isoY);
       groundLayer.addChild(tile);
-      
+
       // For walls and objects, add a "depth" component
-      if (WORLD_MAP[y][x] === 1) {  // Wall
+      if (WORLD_MAP[y][x] === 1) {
+        // Wall
         const wall = new Graphics();
-        wall.beginFill(0x606060);  // Slightly darker for the wall face
-        
+        wall.beginFill(0x606060); // Slightly darker for the wall face
+
         // Draw the wall side
         wall.moveTo(0, TILE_HEIGHT / 2);
         wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT);
@@ -155,7 +166,7 @@ function drawMap() {
         wall.lineTo(0, TILE_HEIGHT / 2 + TILE_DEPTH);
         wall.closePath();
         wall.endFill();
-        
+
         // Draw the wall face
         wall.beginFill(0x707070);
         wall.moveTo(TILE_WIDTH / 2, TILE_HEIGHT);
@@ -164,12 +175,12 @@ function drawMap() {
         wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT + TILE_DEPTH);
         wall.closePath();
         wall.endFill();
-        
+
         // Position the wall
         wall.position.set(isoX, isoY);
         objectLayer.addChild(wall);
-      }
-      else if (WORLD_MAP[y][x] === 2) {  // Water
+      } else if (WORLD_MAP[y][x] === 2) {
+        // Water
         // Add a slight animation or shine to water tiles
         const waterEffect = new Graphics();
         waterEffect.beginFill(0x6060ff, 0.3);
@@ -179,7 +190,7 @@ function drawMap() {
         waterEffect.lineTo(0, TILE_HEIGHT / 2);
         waterEffect.closePath();
         waterEffect.endFill();
-        
+
         waterEffect.position.set(isoX, isoY);
         objectLayer.addChild(waterEffect);
       }
@@ -194,25 +205,28 @@ function createPlayer() {
   const { x, y } = gridToIso(playerState.gridX, playerState.gridY);
   playerState.x = x;
   playerState.y = y;
-  
+
   // Draw player (as a placeholder - would normally be a sprite)
   updatePlayerGraphics();
-  
+
   // Position player
-  player.position.set(playerState.x, playerState.y - PLAYER_HEIGHT + TILE_HEIGHT / 2);
+  player.position.set(
+    playerState.x,
+    playerState.y - PLAYER_HEIGHT + TILE_HEIGHT / 2,
+  );
   playerLayer.addChild(player);
 }
 
 // Function to update player graphics based on movement state and direction
 function updatePlayerGraphics() {
   player.clear();
-  
+
   // Determine color based on movement
   const color = playerState.isMoving ? 0xffaa00 : 0xff0000;
-  
+
   // Draw an isometric character (diamond base with a "body")
   player.beginFill(color);
-  
+
   // Base/feet
   player.moveTo(PLAYER_WIDTH / 2, PLAYER_HEIGHT - TILE_HEIGHT / 2);
   player.lineTo(PLAYER_WIDTH, PLAYER_HEIGHT - TILE_HEIGHT / 4);
@@ -220,12 +234,17 @@ function updatePlayerGraphics() {
   player.lineTo(0, PLAYER_HEIGHT - TILE_HEIGHT / 4);
   player.closePath();
   player.endFill();
-  
+
   // Body
   player.beginFill(color);
-  player.drawRect(PLAYER_WIDTH / 4, 0, PLAYER_WIDTH / 2, PLAYER_HEIGHT - TILE_HEIGHT / 4);
+  player.drawRect(
+    PLAYER_WIDTH / 4,
+    0,
+    PLAYER_WIDTH / 2,
+    PLAYER_HEIGHT - TILE_HEIGHT / 4,
+  );
   player.endFill();
-  
+
   // In a full implementation, you would use different sprite frames based on
   // playerState.direction and playerState.animationFrame
 }
@@ -286,10 +305,10 @@ worldContainer.on('pointerdown', (event: FederatedPointerEvent) => {
   // Convert screen position to world position
   const worldX = event.global.x - worldContainer.x;
   const worldY = event.global.y - worldContainer.y;
-  
+
   // Convert to grid coordinates
   const { gridX, gridY } = isoToGrid(worldX, worldY);
-  
+
   // Check if target is valid
   if (isWalkableTile(gridX, gridY)) {
     playerState.targetGridX = gridX;
@@ -321,7 +340,7 @@ function debugCollision(x: number, y: number) {
   debugMarker.endFill();
   debugMarker.position.set(x, y);
   worldContainer.addChild(debugMarker);
-  
+
   // Remove after a second
   setTimeout(() => {
     worldContainer.removeChild(debugMarker);
@@ -329,10 +348,15 @@ function debugCollision(x: number, y: number) {
 }
 
 // Calculate direction based on movement
-function calculateDirection(fromX: number, fromY: number, toX: number, toY: number): string {
+function calculateDirection(
+  fromX: number,
+  fromY: number,
+  toX: number,
+  toY: number,
+): string {
   const dx = toX - fromX;
   const dy = toY - fromY;
-  
+
   // Determine predominant direction
   if (Math.abs(dx) > Math.abs(dy)) {
     return dx > 0 ? 'east' : 'west';
@@ -342,21 +366,26 @@ function calculateDirection(fromX: number, fromY: number, toX: number, toY: numb
 }
 
 // Pathfinding function (simple A*)
-function findPath(startX: number, startY: number, targetX: number, targetY: number): Array<{x: number, y: number}> {
+function findPath(
+  startX: number,
+  startY: number,
+  targetX: number,
+  targetY: number,
+): Array<{ x: number; y: number }> {
   // A simple direct path for demonstration
   // In a real game, you'd implement A* pathfinding here
-  return [{x: targetX, y: targetY}];
+  return [{ x: targetX, y: targetY }];
 }
 
 // Game loop
 app.ticker.add((time) => {
   // Reset movement flag at the start of each frame
   playerState.isMoving = false;
-  
+
   // Calculate potential new position based on direct keyboard input
   let moveX = 0;
   let moveY = 0;
-  
+
   // Determine movement direction based on keys
   if (keys.up) {
     moveY = -1;
@@ -367,7 +396,7 @@ app.ticker.add((time) => {
     playerState.direction = 'south';
     playerState.isMoving = true;
   }
-  
+
   if (keys.left) {
     moveX = -1;
     playerState.direction = 'west';
@@ -377,7 +406,7 @@ app.ticker.add((time) => {
     playerState.direction = 'east';
     playerState.isMoving = true;
   }
-  
+
   // If there's no movement input, character stops immediately
   if (!playerState.isMoving) {
     // Update player visual to stopped state
@@ -386,33 +415,38 @@ app.ticker.add((time) => {
     // Determine grid-level movement based on key presses
     let newGridX = playerState.gridX;
     let newGridY = playerState.gridY;
-    
+
     // Simple direct grid movement
-    if (moveX > 0) newGridX += 1;
-    if (moveX < 0) newGridX -= 1;
-    if (moveY > 0) newGridY += 1;
-    if (moveY < 0) newGridY -= 1;
-    
+    if (moveX > 0) newGridX += PLAYER_SPEED;
+    if (moveX < 0) newGridX -= PLAYER_SPEED;
+    if (moveY > 0) newGridY += PLAYER_SPEED;
+    if (moveY < 0) newGridY -= PLAYER_SPEED;
+
     // Debug the proposed movement
-    console.log(`Attempting to move from (${playerState.gridX},${playerState.gridY}) to (${newGridX},${newGridY})`);
-    console.log(`Tile at destination: ${WORLD_MAP[newGridY][newGridX]}`);
-    
+    console.log(
+      `Attempting to move from (${playerState.gridX},${playerState.gridY}) to (${newGridX},${newGridY})`,
+    );
+    console.log(
+      `Tile at destination: ${WORLD_MAP[newGridY][newGridX]}`,
+    );
+
     // Check if the new grid position is valid
     if (isWalkableTile(newGridX, newGridY)) {
       // Update grid position
       playerState.gridX = newGridX;
       playerState.gridY = newGridY;
-      
+
       // Update isometric position based on the grid
       const isoPos = gridToIso(playerState.gridX, playerState.gridY);
       playerState.x = isoPos.x;
       playerState.y = isoPos.y;
-      
+
       // Update animation frame every few ticks
       if (time.deltaTime % 10 < 1) {
-        playerState.animationFrame = (playerState.animationFrame + 1) % 4;
+        playerState.animationFrame =
+          (playerState.animationFrame + 1) % 4;
       }
-      
+
       // Update player visual
       updatePlayerGraphics();
     } else {
@@ -423,11 +457,14 @@ app.ticker.add((time) => {
   }
 
   // Update player sprite position
-  player.position.set(playerState.x, playerState.y - PLAYER_HEIGHT + TILE_HEIGHT / 2);
+  player.position.set(
+    playerState.x,
+    playerState.y - PLAYER_HEIGHT + TILE_HEIGHT / 2,
+  );
 
   // Sort the objects in the playerLayer for correct depth
   sortObjectsByDepth();
-  
+
   // Update camera position (center on player)
   worldContainer.x = VIEWPORT_WIDTH / 2 - playerState.x;
   worldContainer.y = VIEWPORT_HEIGHT / 2 - playerState.y;
@@ -444,11 +481,11 @@ function sortObjectsByDepth() {
 function init() {
   // Draw map first
   drawMap();
-  
+
   // Set a guaranteed valid starting position
   playerState.gridX = 5;
   playerState.gridY = 5;
-  
+
   // Check if this position is actually walkable
   if (!isWalkableTile(playerState.gridX, playerState.gridY)) {
     // Fallback: Search for the first walkable tile
@@ -465,29 +502,35 @@ function init() {
       }
       if (foundValidTile) break;
     }
-    
+
     // If still no valid tile found (extreme edge case)
     if (!foundValidTile) {
-      console.error("No walkable tiles found in map!");
+      console.error('No walkable tiles found in map!');
       playerState.gridX = 1;
       playerState.gridY = 1;
     }
   }
-  
+
   // Ensure target matches current position
   playerState.targetGridX = playerState.gridX;
   playerState.targetGridY = playerState.gridY;
-  
+
   // Calculate isometric coordinates from grid position
   const iso = gridToIso(playerState.gridX, playerState.gridY);
   playerState.x = iso.x;
   playerState.y = iso.y;
-  
+
   // Now create the player with the confirmed valid position
   createPlayer();
-  
-  console.log(`Player starting at grid position: ${playerState.gridX},${playerState.gridY}`);
-  console.log(`Tile value at start position: ${WORLD_MAP[playerState.gridY][playerState.gridX]}`);
+
+  console.log(
+    `Player starting at grid position: ${playerState.gridX},${playerState.gridY}`,
+  );
+  console.log(
+    `Tile value at start position: ${
+      WORLD_MAP[playerState.gridY][playerState.gridX]
+    }`,
+  );
 }
 
 // Start the game
