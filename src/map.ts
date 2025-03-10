@@ -1,6 +1,5 @@
 import { Container } from 'pixi.js';
 import { Tile, TileType } from './tile';
-import { gridToIso, isoToGrid, TILE_HEIGHT } from './lib/map-helpers';
 
 export interface MapOptions {
   worldContainer: Container;
@@ -80,7 +79,7 @@ export class Map {
           type: tileType,
           groundLayer: this.groundLayer,
           objectLayer: this.objectLayer,
-          debug: true
+          debug: true,
         });
       }
     }
@@ -110,11 +109,6 @@ export class Map {
     return this.playerLayer;
   }
 
-  // For accessing TILE_HEIGHT in Player class
-  public get tileHeight(): number {
-    return TILE_HEIGHT;
-  }
-
   // Find first walkable tile (used for initialization)
   public findFirstWalkableTile(): { x: number; y: number } {
     for (let y = 1; y < this.WORLD_MAP.length - 1; y++) {
@@ -127,7 +121,4 @@ export class Map {
     // Fallback - should never happen with the current map
     return { x: 1, y: 1 };
   }
-
-  // These pass-through methods have been removed
-  // Import gridToIso and isoToGrid directly from './lib/map-helpers' instead
 }
