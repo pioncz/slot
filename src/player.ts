@@ -1,6 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
 import { Map } from './map';
-import { TILE_HEIGHT } from './lib/map-helpers';
+import { TILE_HEIGHT, gridToIso } from './lib/map-helpers';
 
 // Direction enum for player movement
 enum Direction {
@@ -56,8 +56,8 @@ export class Player {
     this.state.gridX = validPosition.x;
     this.state.gridY = validPosition.y;
 
-    // Calculate isometric coordinates using the map's conversion method
-    const isoPos = this.map.gridToIso(
+    // Calculate isometric coordinates directly using the helper function
+    const isoPos = gridToIso(
       this.state.gridX,
       this.state.gridY,
     );
@@ -169,8 +169,8 @@ export class Player {
         this.state.gridX = newGridX;
         this.state.gridY = newGridY;
 
-        // Update isometric position based on the grid using the map's conversion method
-        const isoPos = this.map.gridToIso(
+        // Update isometric position based on the grid directly using the helper function
+        const isoPos = gridToIso(
           this.state.gridX,
           this.state.gridY,
         );

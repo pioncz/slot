@@ -128,19 +128,6 @@ export class Map {
     return { x: 1, y: 1 };
   }
 
-  // Pass through the utility function for isometric conversion
-  public gridToIso(
-    gridX: number,
-    gridY: number,
-  ): { x: number; y: number } {
-    return gridToIso(gridX, gridY);
-  }
-
-  // Pass through the utility function for grid conversion
-  public isoToGrid(
-    x: number,
-    y: number,
-  ): { gridX: number; gridY: number } {
-    return isoToGrid(x, y);
-  }
+  // These pass-through methods have been removed
+  // Import gridToIso and isoToGrid directly from './lib/map-helpers' instead
 }
