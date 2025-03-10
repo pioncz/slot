@@ -1,4 +1,4 @@
-import { Container, Graphics, FederatedPointerEvent } from 'pixi.js';
+import { Container, Graphics } from 'pixi.js';
 import { Map } from './Map';
 
 // Direction enum for player movement
@@ -20,8 +20,6 @@ export class Player {
     gridY: 5,
     x: 0,
     y: 0,
-    targetGridX: 5,
-    targetGridY: 5,
     isMoving: false,
     direction: Direction.South,
     animationFrame: 0,
@@ -51,10 +49,6 @@ export class Player {
     const validPosition = this.map.findFirstWalkableTile();
     this.state.gridX = validPosition.x;
     this.state.gridY = validPosition.y;
-    
-    // Set target to match current position
-    this.state.targetGridX = this.state.gridX;
-    this.state.targetGridY = this.state.gridY;
     
     // Calculate isometric coordinates
     const isoPos = this.map.gridToIso(this.state.gridX, this.state.gridY);
@@ -116,21 +110,6 @@ export class Player {
       case 'arrowright':
         this.keys.right = false;
         break;
-    }
-  }
-  
-  public handlePointerDown(event: FederatedPointerEvent): void {
-    // Convert screen position to world position
-    const worldX = event.global.x - this.container.x;
-    const worldY = event.global.y - this.container.y;
-    
-    // Convert to grid coordinates
-    const { gridX, gridY } = this.map.isoToGrid(worldX, worldY);
-    
-    // Check if target is valid
-    if (this.map.isWalkableTile(gridX, gridY)) {
-      this.state.targetGridX = gridX;
-      this.state.targetGridY = gridY;
     }
   }
   

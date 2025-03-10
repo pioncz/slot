@@ -52,7 +52,7 @@ export class Game {
   }
 
   private setupInputHandlers(): void {
-    // Setup keyboard input
+    // Setup keyboard input only
     window.addEventListener(
       'keydown',
       this.player.handleKeyDown.bind(this.player),
@@ -60,13 +60,6 @@ export class Game {
     window.addEventListener(
       'keyup',
       this.player.handleKeyUp.bind(this.player),
-    );
-
-    // Setup mouse/touch input
-    this.worldContainer.eventMode = 'static';
-    this.worldContainer.on(
-      'pointerdown',
-      this.player.handlePointerDown.bind(this.player),
     );
   }
 
