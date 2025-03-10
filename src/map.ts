@@ -85,23 +85,43 @@ export class Map {
     }
   }
 
-  // Check if a tile is walkable
-  public isWalkableTile(gridX: number, gridY: number): boolean {
-    // Check bounds
-    if (
-      gridX < 0 ||
-      gridX >= this.WORLD_MAP[0].length ||
-      gridY < 0 ||
-      gridY >= this.WORLD_MAP.length
-    ) {
-      return false;
+  // Improved collision detection accounting for player size
+  public isWalkableTile(gridX: number, gridY: number, playerSize: number = 0.5): boolean {
+    // Define the player's bounding box points (centered at gridX, gridY with size of playerSize)
+    const halfSize = playerSize / 2;
+    
+    // Check all four corners of the player's bounding box
+    const corners = [
+      { x: gridX - halfSize, y: gridY - halfSize }, // Top-left
+      { x: gridX + halfSize, y: gridY - halfSize }, // Top-right
+      { x: gridX - halfSize, y: gridY + halfSize }, // Bottom-left
+      { x: gridX + halfSize, y: gridY + halfSize }  // Bottom-right
+    ];
+    
+    // Check each corner to see if it's in a non-walkable tile
+    for (const corner of corners) {
+      // Convert to grid coordinates to check against map
+      const checkX = Math.floor(corner.x);
+      const checkY = Math.floor(corner.y);
+      
+      // Check bounds
+      if (
+        checkX < 0 ||
+        checkX >= this.WORLD_MAP[0].length ||
+        checkY < 0 ||
+        checkY >= this.WORLD_MAP.length
+      ) {
+        return false;
+      }
+      
+      // If any corner is in a non-walkable tile, return false
+      if (this.WORLD_MAP[checkY][checkX] !== 0) {
+        return false;
+      }
     }
-
-    const gridXDec = Math.floor(gridX);
-    const gridYDec = Math.floor(gridY);
-
-    // Check if tile is walkable (grass, type 0)
-    return this.WORLD_MAP[gridYDec][gridXDec] === 0;
+    
+    // All corners are in walkable tiles
+    return true;
   }
 
   // Get player layer for sorting
