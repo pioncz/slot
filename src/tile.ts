@@ -37,8 +37,8 @@ export class Tile {
 
     // Calculate screen (isometric) coordinates using helper function
     const { x, y } = gridToIso(this.gridX, this.gridY);
-    this.screenX = x;
-    this.screenY = y;
+    this.screenX = x - TILE_WIDTH / 2;
+    this.screenY = y - TILE_HEIGHT / 2;
 
     // Draw the tile immediately after being created
     this.draw(options.groundLayer, options.objectLayer);
@@ -73,6 +73,7 @@ export class Tile {
 
     // Position the tile
     tile.position.set(this.screenX, this.screenY);
+
     groundLayer.addChild(tile);
 
     // For walls and objects, add a "depth" component
