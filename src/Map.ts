@@ -1,16 +1,12 @@
-import { Container, Graphics } from 'pixi.js';
-import { Tile, TileType } from './Tile';
+import { Container } from 'pixi.js';
+import { Tile, TileType } from './tile';
+import { gridToIso, isoToGrid, TILE_HEIGHT } from './lib/map-helpers';
 
 export class Map {
   private groundLayer: Container;
   private objectLayer: Container;
   private playerLayer: Container;
   private tiles: Tile[][] = [];
-
-  // Map constants
-  readonly TILE_WIDTH = 64;
-  readonly TILE_HEIGHT = 32;
-  readonly TILE_DEPTH = 32;
 
   // World map definition (0 = grass, 1 = wall, 2 = water)
   private readonly WORLD_MAP = [
@@ -78,39 +74,27 @@ export class Map {
           x,
           y,
           tileType,
-          this.TILE_WIDTH,
-          this.TILE_HEIGHT,
-          this.TILE_DEPTH,
           this.groundLayer,
-          this.objectLayer
+          this.objectLayer,
         );
       }
     }
   }
 
-  // Grid to screen coordinates conversion
+  // Pass through the utility function for isometric conversion
   public gridToIso(
     gridX: number,
     gridY: number,
   ): { x: number; y: number } {
-    return {
-      x: (gridX - gridY) * (this.TILE_WIDTH / 2),
-      y: (gridX + gridY) * (this.TILE_HEIGHT / 2),
-    };
+    return gridToIso(gridX, gridY);
   }
 
-  // Screen to grid coordinates conversion
+  // Pass through the utility function for grid conversion
   public isoToGrid(
     x: number,
     y: number,
   ): { gridX: number; gridY: number } {
-    const gridX = Math.floor(
-      (x / (this.TILE_WIDTH / 2) + y / (this.TILE_HEIGHT / 2)) / 2,
-    );
-    const gridY = Math.floor(
-      (y / (this.TILE_HEIGHT / 2) - x / (this.TILE_WIDTH / 2)) / 2,
-    );
-    return { gridX, gridY };
+    return isoToGrid(x, y);
   }
 
   // Check if a tile is walkable
@@ -135,6 +119,11 @@ export class Map {
   // Get player layer for sorting
   public getPlayerLayer(): Container {
     return this.playerLayer;
+  }
+
+  // For accessing TILE_HEIGHT in Player class
+  public get TILE_HEIGHT(): number {
+    return TILE_HEIGHT;
   }
 
   // Find first walkable tile (used for initialization)

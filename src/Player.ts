@@ -1,19 +1,20 @@
 import { Container, Graphics } from 'pixi.js';
-import { Map } from './Map';
+import { Map } from './map';
+import { TILE_HEIGHT } from './lib/map-helpers';
 
 // Direction enum for player movement
 enum Direction {
   North = 'north',
   East = 'east',
   South = 'south',
-  West = 'west'
+  West = 'west',
 }
 
 export class Player {
   private container: Container;
   private map: Map;
   private graphic: Graphics;
-  
+
   // Player state
   private state = {
     gridX: 5,
@@ -24,7 +25,7 @@ export class Player {
     direction: Direction.South,
     animationFrame: 0,
   };
-  
+
   // Input state
   private keys = {
     up: false,
@@ -32,45 +33,48 @@ export class Player {
     left: false,
     right: false,
   };
-  
+
   // Player constants
   readonly PLAYER_WIDTH = 32;
   readonly PLAYER_HEIGHT = 48;
   readonly PLAYER_SPEED = 0.1;
-  
+
   constructor(worldContainer: Container, map: Map) {
     this.container = worldContainer;
     this.map = map;
     this.graphic = new Graphics();
   }
-  
+
   public init(): void {
     // Find a valid starting position
     const validPosition = this.map.findFirstWalkableTile();
     this.state.gridX = validPosition.x;
     this.state.gridY = validPosition.y;
-    
-    // Calculate isometric coordinates
-    const isoPos = this.map.gridToIso(this.state.gridX, this.state.gridY);
+
+    // Calculate isometric coordinates using the map's conversion method
+    const isoPos = this.map.gridToIso(
+      this.state.gridX,
+      this.state.gridY,
+    );
     this.state.x = isoPos.x;
     this.state.y = isoPos.y;
-    
+
     // Create player graphic
     this.updateGraphics();
-    
+
     // Position player
     this.graphic.position.set(
       this.state.x,
-      this.state.y - this.PLAYER_HEIGHT + this.map.TILE_HEIGHT / 2,
+      this.state.y - this.PLAYER_HEIGHT + TILE_HEIGHT / 2,
     );
-    
+
     this.map.getPlayerLayer().addChild(this.graphic);
-    
+
     console.log(
       `Player starting at grid position: ${this.state.gridX},${this.state.gridY}`,
     );
   }
-  
+
   public handleKeyDown(e: KeyboardEvent): void {
     switch (e.key.toLowerCase()) {
       case 'w':
@@ -91,7 +95,7 @@ export class Player {
         break;
     }
   }
-  
+
   public handleKeyUp(e: KeyboardEvent): void {
     switch (e.key.toLowerCase()) {
       case 'w':
@@ -112,15 +116,15 @@ export class Player {
         break;
     }
   }
-  
+
   public update(time: any): void {
     // Reset movement flag at the start of each frame
     this.state.isMoving = false;
-    
+
     // Calculate potential new position based on keyboard input
     let moveX = 0;
     let moveY = 0;
-    
+
     // Determine movement direction based on keys
     if (this.keys.up) {
       moveY = -1;
@@ -131,7 +135,7 @@ export class Player {
       this.state.direction = Direction.South;
       this.state.isMoving = true;
     }
-    
+
     if (this.keys.left) {
       moveX = -1;
       this.state.direction = Direction.West;
@@ -141,92 +145,102 @@ export class Player {
       this.state.direction = Direction.East;
       this.state.isMoving = true;
     }
-    
+
     // If there's movement input, move the player
     if (this.state.isMoving) {
       // Determine grid-level movement based on key presses
       let newGridX = this.state.gridX;
       let newGridY = this.state.gridY;
-      
+
       // Simple direct grid movement
       if (moveX > 0) newGridX += this.PLAYER_SPEED;
       if (moveX < 0) newGridX -= this.PLAYER_SPEED;
       if (moveY > 0) newGridY += this.PLAYER_SPEED;
       if (moveY < 0) newGridY -= this.PLAYER_SPEED;
-      
+
       // Check if the new grid position is valid
       if (this.map.isWalkableTile(newGridX, newGridY)) {
         // Update grid position
         this.state.gridX = newGridX;
         this.state.gridY = newGridY;
-        
-        // Update isometric position based on the grid
-        const isoPos = this.map.gridToIso(this.state.gridX, this.state.gridY);
+
+        // Update isometric position based on the grid using the map's conversion method
+        const isoPos = this.map.gridToIso(
+          this.state.gridX,
+          this.state.gridY,
+        );
         this.state.x = isoPos.x;
         this.state.y = isoPos.y;
-        
+
         // Update animation frame every few ticks
         if (time.deltaTime % 10 < 1) {
-          this.state.animationFrame = (this.state.animationFrame + 1) % 4;
+          this.state.animationFrame =
+            (this.state.animationFrame + 1) % 4;
         }
       } else {
         // We hit a wall, stop moving
         this.state.isMoving = false;
       }
     }
-    
+
     // Update player graphics
     this.updateGraphics();
-    
+
     // Update player sprite position
     this.graphic.position.set(
       this.state.x,
-      this.state.y - this.PLAYER_HEIGHT + this.map.TILE_HEIGHT / 2,
+      this.state.y - this.PLAYER_HEIGHT + TILE_HEIGHT / 2,
     );
-    
+
     // Sort objects by depth for proper rendering
     this.sortObjectsByDepth();
   }
-  
+
   // Update player graphics based on movement state and direction
   private updateGraphics(): void {
     this.graphic.clear();
-    
+
     // Determine color based on movement
     const color = this.state.isMoving ? 0xffaa00 : 0xff0000;
-    
+
     // Draw an isometric character (diamond base with a "body")
-    
+
     // Base/feet
-    this.graphic.moveTo(this.PLAYER_WIDTH / 2, this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 2);
-    this.graphic.lineTo(this.PLAYER_WIDTH, this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 4);
+    this.graphic.moveTo(
+      this.PLAYER_WIDTH / 2,
+      this.PLAYER_HEIGHT - TILE_HEIGHT / 2,
+    );
+    this.graphic.lineTo(
+      this.PLAYER_WIDTH,
+      this.PLAYER_HEIGHT - TILE_HEIGHT / 4,
+    );
     this.graphic.lineTo(this.PLAYER_WIDTH / 2, this.PLAYER_HEIGHT);
-    this.graphic.lineTo(0, this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 4);
+    this.graphic.lineTo(0, this.PLAYER_HEIGHT - TILE_HEIGHT / 4);
     this.graphic.closePath();
     this.graphic.fill({ color });
-    
+
     // Body
     this.graphic.rect(
       this.PLAYER_WIDTH / 4,
       0,
       this.PLAYER_WIDTH / 2,
-      this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 4
+      this.PLAYER_HEIGHT - TILE_HEIGHT / 4,
     );
     this.graphic.fill({ color });
   }
-  
+
   // Sort objects by their y position for proper layering
   private sortObjectsByDepth(): void {
     this.map.getPlayerLayer().children.sort((a, b) => {
       return a.position.y - b.position.y;
     });
   }
-  
+
   // Getters for screen position (used by camera)
   public getScreenX(): number {
     return this.state.x;
   }
-  
+
   public getScreenY(): number {
     return this.state.y;
   }

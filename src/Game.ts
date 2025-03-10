@@ -1,6 +1,6 @@
 import { Application, Container } from 'pixi.js';
-import { Map } from './Map';
-import { Player } from './Player';
+import { Map } from './map';
+import { Player } from './player';
 
 export class Game {
   private app: Application;

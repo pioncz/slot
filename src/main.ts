@@ -1,4 +1,4 @@
-import { Game } from './Game';
+import { Game } from './game';
 import './style.css';
 
 // Entry point for the application
