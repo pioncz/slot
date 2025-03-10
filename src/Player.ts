@@ -217,7 +217,6 @@ export class Player {
     const color = this.state.isMoving ? 0xffaa00 : 0xff0000;
     
     // Draw an isometric character (diamond base with a "body")
-    this.graphic.beginFill(color);
     
     // Base/feet
     this.graphic.moveTo(this.PLAYER_WIDTH / 2, this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 2);
@@ -225,17 +224,16 @@ export class Player {
     this.graphic.lineTo(this.PLAYER_WIDTH / 2, this.PLAYER_HEIGHT);
     this.graphic.lineTo(0, this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 4);
     this.graphic.closePath();
-    this.graphic.endFill();
+    this.graphic.fill({ color });
     
     // Body
-    this.graphic.beginFill(color);
-    this.graphic.drawRect(
+    this.graphic.rect(
       this.PLAYER_WIDTH / 4,
       0,
       this.PLAYER_WIDTH / 2,
-      this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 4,
+      this.PLAYER_HEIGHT - this.map.TILE_HEIGHT / 4
     );
-    this.graphic.endFill();
+    this.graphic.fill({ color });
   }
   
   // Sort objects by their y position for proper layering

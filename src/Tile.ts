@@ -55,13 +55,13 @@ export class Tile {
     }
     
     // Draw the isometric tile (diamond shape)
-    tile.beginFill(fillColor);
+    tile.clear();
     tile.moveTo(this.width / 2, 0);
     tile.lineTo(this.width, this.height / 2);
     tile.lineTo(this.width / 2, this.height);
     tile.lineTo(0, this.height / 2);
     tile.closePath();
-    tile.endFill();
+    tile.fill({ color: fillColor });
     
     // Position the tile
     tile.position.set(this.screenX, this.screenY);
@@ -79,22 +79,21 @@ export class Tile {
     const wall = new Graphics();
     
     // Wall side
-    wall.beginFill(0x606060); // Slightly darker for the wall face
+    wall.clear();
     wall.moveTo(0, this.height / 2);
     wall.lineTo(this.width / 2, this.height);
     wall.lineTo(this.width / 2, this.height + this.depth);
     wall.lineTo(0, this.height / 2 + this.depth);
     wall.closePath();
-    wall.endFill();
+    wall.fill({ color: 0x606060 }); // Slightly darker for the wall face
     
     // Wall face
-    wall.beginFill(0x707070);
     wall.moveTo(this.width / 2, this.height);
     wall.lineTo(this.width, this.height / 2);
     wall.lineTo(this.width, this.height / 2 + this.depth);
     wall.lineTo(this.width / 2, this.height + this.depth);
     wall.closePath();
-    wall.endFill();
+    wall.fill({ color: 0x707070 });
     
     // Position the wall
     wall.position.set(this.screenX, this.screenY);
@@ -104,13 +103,12 @@ export class Tile {
   private drawWater(objectLayer: Container): void {
     // Add a slight animation or shine to water tiles
     const waterEffect = new Graphics();
-    waterEffect.beginFill(0x6060ff, 0.3);
     waterEffect.moveTo(this.width / 2, 0);
     waterEffect.lineTo(this.width, this.height / 2);
     waterEffect.lineTo(this.width / 2, this.height);
     waterEffect.lineTo(0, this.height / 2);
     waterEffect.closePath();
-    waterEffect.endFill();
+    waterEffect.fill({ color: 0x6060ff, alpha: 0.3 });
     
     waterEffect.position.set(this.screenX, this.screenY);
     objectLayer.addChild(waterEffect);
