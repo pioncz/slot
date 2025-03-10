@@ -1,7 +1,3 @@
-// ============================================================================
-// 3. Update the player.ts file to support floor navigation
-// ============================================================================
-
 import { Container, Graphics, Text } from 'pixi.js';
 import { Map } from './map';
 import { TILE_HEIGHT, gridToIso } from './lib/map-helpers';
@@ -20,7 +16,6 @@ export interface PlayerOptions {
 }
 
 export class Player {
-  private container: Container;
   private map: Map;
   private graphic: Graphics;
 
@@ -55,7 +50,6 @@ export class Player {
   readonly PLAYER_SPEED = 0.1;
 
   constructor(options: PlayerOptions) {
-    this.container = options.worldContainer;
     this.map = options.map;
     this.graphic = new Graphics();
   }
@@ -173,7 +167,7 @@ export class Player {
     if (this.interactionCooldown > 0) {
       this.interactionCooldown--;
     }
-    
+
     // Reset movement flag at the start of each frame
     this.state.isMoving = false;
 
@@ -207,20 +201,20 @@ export class Player {
       const stairsDirection = this.map.checkForStairs(
         this.state.gridX,
         this.state.gridY,
-        this.state.floor
+        this.state.floor,
       );
-      
+
       if (stairsDirection !== 0) {
         // Attempt to change floors
         const newFloor = this.state.floor + stairsDirection;
         const success = this.map.changeFloor(newFloor);
-        
+
         if (success) {
           this.state.floor = newFloor;
-          
+
           // Set cooldown to prevent rapid stair usage
           this.interactionCooldown = this.INTERACTION_COOLDOWN_MAX;
-          
+
           console.log(`Player moved to floor ${this.state.floor}`);
         }
       }
@@ -232,18 +226,36 @@ export class Player {
       let newGridX = this.state.gridX;
       let newGridY = this.state.gridY;
 
-      // Simple direct grid movement
-      if (moveX > 0) newGridX += this.PLAYER_SPEED;
-      if (moveX < 0) newGridX -= this.PLAYER_SPEED;
-      if (moveY > 0) newGridY += this.PLAYER_SPEED;
-      if (moveY < 0) newGridY -= this.PLAYER_SPEED;
+      // Calculate movement delta
+      let deltaX = 0;
+      let deltaY = 0;
+
+      if (moveX > 0) deltaX = this.PLAYER_SPEED;
+      if (moveX < 0) deltaX = -this.PLAYER_SPEED;
+      if (moveY > 0) deltaY = this.PLAYER_SPEED;
+      if (moveY < 0) deltaY = -this.PLAYER_SPEED;
+      console.log(deltaX, deltaY);
+      // Normalize diagonal movement
+      if ((deltaX < 0 && deltaY > 0) || (deltaX > 0 && deltaY < 0)) {
+        // When moving diagonally, multiply by approximately 0.7071 (1/sqrt(2))
+        // This normalizes the speed so diagonal movement isn't faster
+        deltaX *= 0.7071;
+        deltaY *= 0.7071;
+      }
+
+      // Apply movement
+      newGridX += deltaX;
+      newGridY += deltaY;
 
       // Check if the new grid position is valid on the current floor
-      if (this.map.isWalkableTile(newGridX, newGridY, this.state.floor)) {
+      if (
+        this.map.isWalkableTile(newGridX, newGridY, this.state.floor)
+      ) {
         // Update grid position
         this.state.gridX = newGridX;
         this.state.gridY = newGridY;
-        // Update isometric position based on the grid directly using the helper function
+
+        // Update isometric position based on the grid
         const isoPos = gridToIso(this.state.gridX, this.state.gridY);
         this.state.x = isoPos.x;
         this.state.y = isoPos.y;
@@ -287,7 +299,9 @@ export class Player {
     this.graphic.clear();
 
     // Determine color based on floor level
-    const floorColors = [0xff0000, 0xffaa00, 0xffff00, 0x00ff00, 0x00ffff];
+    const floorColors = [
+      0xff0000, 0xffaa00, 0xffff00, 0x00ff00, 0x00ffff,
+    ];
     const color = floorColors[this.state.floor % floorColors.length];
 
     // Draw the isometric character (diamond base with a "body")
@@ -328,7 +342,7 @@ export class Player {
     const floorOffset = this.state.floor * (32 + 5); // Match tile floor offset
     return this.state.y - floorOffset;
   }
-  
+
   // Get the player's current floor
   public getCurrentFloor(): number {
     return this.state.floor;
