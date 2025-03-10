@@ -195,11 +195,6 @@ export class Player {
         // Update grid position
         this.state.gridX = newGridX;
         this.state.gridY = newGridY;
-        console.log(
-          'New pos: ',
-          Math.round(this.state.gridX * 100) / 100,
-          Math.round(this.state.gridY * 100) / 100,
-        );
         // Update isometric position based on the grid directly using the helper function
         const isoPos = gridToIso(this.state.gridX, this.state.gridY);
         this.state.x = isoPos.x;
