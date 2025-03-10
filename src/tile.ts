@@ -77,7 +77,7 @@ export class Tile {
 
     // For walls and objects, add a "depth" component
     if (this.type === TileType.Wall) {
-      this.drawWall(objectLayer);
+      // this.drawWall(objectLayer);
     } else if (this.type === TileType.Water) {
       this.drawWater(objectLayer);
     }
@@ -137,21 +137,21 @@ export class Tile {
         fill: 'white',
         stroke: {
           color: 'black',
-          width: 1
+          width: 1,
         },
         align: 'center',
-      }
+      },
     });
-    
-    // Position the text in the corner of the tile
+
+    // Position the text in the center of the tile
     coordText.position.set(
-      this.screenX + 5,
-      this.screenY + 5
+      this.screenX + TILE_WIDTH / 2,
+      this.screenY + TILE_HEIGHT / 2,
     );
-    
-    // Set anchor to top-left
-    coordText.anchor.set(0, 0);
-    
+
+    // Set anchor to center
+    coordText.anchor.set(0.5, 0.5);
+
     // Add the text to the ground layer
     groundLayer.addChild(coordText);
   }

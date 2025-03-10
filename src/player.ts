@@ -1,4 +1,4 @@
-import { Container, Graphics } from 'pixi.js';
+import { Container, Graphics, Text } from 'pixi.js';
 import { Map } from './map';
 import { TILE_HEIGHT, gridToIso } from './lib/map-helpers';
 
@@ -53,14 +53,14 @@ export class Player {
   public init(): void {
     // Find a valid starting position
     const validPosition = this.map.findFirstWalkableTile();
-    this.state.gridX = validPosition.x;
-    this.state.gridY = validPosition.y;
 
-    // Calculate isometric coordinates directly using the helper function
-    const isoPos = gridToIso(
-      this.state.gridX,
-      this.state.gridY,
-    );
+    // Make sure we're using integer grid coordinates to start
+    // This ensures player is properly aligned with grid cells
+    this.state.gridX = Math.floor(validPosition.x);
+    this.state.gridY = Math.floor(validPosition.y);
+
+    // Calculate isometric coordinates using the helper function
+    const isoPos = gridToIso(this.state.gridX, this.state.gridY);
     this.state.x = isoPos.x;
     this.state.y = isoPos.y;
 
@@ -68,16 +68,43 @@ export class Player {
     this.updateGraphics();
 
     // Position player
-    this.graphic.position.set(
-      this.state.x,
-      this.state.y - this.PLAYER_HEIGHT + TILE_HEIGHT / 2,
-    );
+    this.graphic.position.set(this.state.x, this.state.y);
+
+    // Add the debug indicator
+    this.addDebugIndicator();
 
     this.map.getPlayerLayer().addChild(this.graphic);
 
     console.log(
       `Player starting at grid position: ${this.state.gridX},${this.state.gridY}`,
     );
+  }
+
+  private addDebugIndicator(): void {
+    // Add a debug indicator to the player container
+    const debugText = new Text({
+      text: `Grid: ${Math.floor(this.state.gridX)},${Math.floor(
+        this.state.gridY,
+      )}`,
+      style: {
+        fontFamily: 'Arial',
+        fontSize: 12,
+        fill: 'white',
+        stroke: {
+          color: 'black',
+          width: 2,
+        },
+        align: 'center',
+      },
+    });
+
+    // Position above the player
+    debugText.position.set(0, -this.PLAYER_HEIGHT - 10);
+
+    // Set anchor to center horizontally
+    debugText.anchor.set(0.5, 0);
+
+    this.graphic.addChild(debugText);
   }
 
   public handleKeyDown(e: KeyboardEvent): void {
@@ -170,10 +197,7 @@ export class Player {
         this.state.gridY = newGridY;
 
         // Update isometric position based on the grid directly using the helper function
-        const isoPos = gridToIso(
-          this.state.gridX,
-          this.state.gridY,
-        );
+        const isoPos = gridToIso(this.state.gridX, this.state.gridY);
         this.state.x = isoPos.x;
         this.state.y = isoPos.y;
 
@@ -181,6 +205,14 @@ export class Player {
         if (time.deltaTime % 10 < 1) {
           this.state.animationFrame =
             (this.state.animationFrame + 1) % 4;
+        }
+
+        // Update the debug text if it exists
+        if (this.graphic.children.length > 0) {
+          const debugText = this.graphic.children[0] as Text;
+          debugText.text = `Grid: ${Math.floor(
+            this.state.gridX,
+          )},${Math.floor(this.state.gridY)}`;
         }
       } else {
         // We hit a wall, stop moving
@@ -192,10 +224,7 @@ export class Player {
     this.updateGraphics();
 
     // Update player sprite position
-    this.graphic.position.set(
-      this.state.x,
-      this.state.y - this.PLAYER_HEIGHT + TILE_HEIGHT / 2,
-    );
+    this.graphic.position.set(this.state.x, this.state.y);
 
     // Sort objects by depth for proper rendering
     this.sortObjectsByDepth();
@@ -208,26 +237,21 @@ export class Player {
     // Determine color based on movement
     const color = this.state.isMoving ? 0xffaa00 : 0xff0000;
 
-    // Draw an isometric character (diamond base with a "body")
+    // Draw the isometric character (diamond base with a "body")
+    // Important: Draw the player centered at (0,0) within its own Graphics object
 
-    // Base/feet
-    this.graphic.moveTo(
-      this.PLAYER_WIDTH / 2,
-      this.PLAYER_HEIGHT - TILE_HEIGHT / 2,
-    );
-    this.graphic.lineTo(
-      this.PLAYER_WIDTH,
-      this.PLAYER_HEIGHT - TILE_HEIGHT / 4,
-    );
-    this.graphic.lineTo(this.PLAYER_WIDTH / 2, this.PLAYER_HEIGHT);
-    this.graphic.lineTo(0, this.PLAYER_HEIGHT - TILE_HEIGHT / 4);
+    // Base/feet - centered diamond shape
+    this.graphic.moveTo(0, -TILE_HEIGHT / 4); // Top point
+    this.graphic.lineTo(this.PLAYER_WIDTH / 2, 0); // Right point
+    this.graphic.lineTo(0, TILE_HEIGHT / 4); // Bottom point
+    this.graphic.lineTo(-this.PLAYER_WIDTH / 2, 0); // Left point
     this.graphic.closePath();
     this.graphic.fill({ color });
 
-    // Body
+    // Body - centered rectangle
     this.graphic.rect(
-      this.PLAYER_WIDTH / 4,
-      0,
+      -this.PLAYER_WIDTH / 4,
+      -this.PLAYER_HEIGHT + TILE_HEIGHT / 4,
       this.PLAYER_WIDTH / 2,
       this.PLAYER_HEIGHT - TILE_HEIGHT / 4,
     );
