@@ -1,4 +1,4 @@
-import { Container, Graphics } from 'pixi.js';
+import { Container, Graphics, Text, TextStyle } from 'pixi.js';
 import {
   gridToIso,
   TILE_WIDTH,
@@ -18,6 +18,7 @@ export class Tile {
   private type: TileType;
   private screenX: number;
   private screenY: number;
+  private debug: boolean;
 
   constructor(
     gridX: number,
@@ -25,10 +26,12 @@ export class Tile {
     type: TileType,
     groundLayer: Container,
     objectLayer: Container,
+    debug: boolean = false
   ) {
     this.gridX = gridX;
     this.gridY = gridY;
     this.type = type;
+    this.debug = debug;
 
     // Calculate screen (isometric) coordinates using helper function
     const { x, y } = gridToIso(gridX, gridY);
@@ -76,6 +79,11 @@ export class Tile {
     } else if (this.type === TileType.Water) {
       this.drawWater(objectLayer);
     }
+
+    // Draw debug coordinates if debug mode is enabled
+    if (this.debug) {
+      this.drawDebugCoordinates(groundLayer);
+    }
   }
 
   private drawWall(objectLayer: Container): void {
@@ -115,6 +123,35 @@ export class Tile {
 
     waterEffect.position.set(this.screenX, this.screenY);
     objectLayer.addChild(waterEffect);
+  }
+
+  private drawDebugCoordinates(groundLayer: Container): void {
+    // Create text displaying the grid coordinates with updated Text constructor
+    const coordText = new Text({
+      text: `${this.gridX},${this.gridY}`,
+      style: {
+        fontFamily: 'Arial',
+        fontSize: 10,
+        fill: 'white',
+        stroke: {
+          color: 'black',
+          width: 1
+        },
+        align: 'center',
+      }
+    });
+    
+    // Position the text in the corner of the tile
+    coordText.position.set(
+      this.screenX + 5,
+      this.screenY + 5
+    );
+    
+    // Set anchor to top-left
+    coordText.anchor.set(0, 0);
+    
+    // Add the text to the ground layer
+    groundLayer.addChild(coordText);
   }
 
   public isWalkable(): boolean {

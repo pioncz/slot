@@ -76,6 +76,7 @@ export class Map {
           tileType,
           this.groundLayer,
           this.objectLayer,
+          true,
         );
       }
     }
