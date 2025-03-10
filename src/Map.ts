@@ -49,16 +49,8 @@ export class Map {
   }
 
   public draw(): void {
-    // Create the tile objects from the map data
+    // Create and draw all tiles in one pass
     this.createTiles();
-
-    // Draw all tiles
-    for (let y = 0; y < this.WORLD_MAP.length; y++) {
-      for (let x = 0; x < this.WORLD_MAP[y].length; x++) {
-        const tile = this.tiles[y][x];
-        tile.draw(this.groundLayer, this.objectLayer);
-      }
-    }
   }
 
   private createTiles(): void {
@@ -81,7 +73,7 @@ export class Map {
             tileType = TileType.Grass;
         }
 
-        // Create a new tile
+        // Create a new tile and have it draw itself immediately
         this.tiles[y][x] = new Tile(
           x,
           y,
@@ -89,6 +81,8 @@ export class Map {
           this.TILE_WIDTH,
           this.TILE_HEIGHT,
           this.TILE_DEPTH,
+          this.groundLayer,
+          this.objectLayer
         );
       }
     }

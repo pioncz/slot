@@ -22,7 +22,9 @@ export class Tile {
     type: TileType, 
     width: number, 
     height: number, 
-    depth: number
+    depth: number,
+    groundLayer: Container,
+    objectLayer: Container
   ) {
     this.gridX = gridX;
     this.gridY = gridY;
@@ -34,9 +36,12 @@ export class Tile {
     // Calculate screen (isometric) coordinates
     this.screenX = (gridX - gridY) * (width / 2);
     this.screenY = (gridX + gridY) * (height / 2);
+    
+    // Draw the tile immediately after being created
+    this.draw(groundLayer, objectLayer);
   }
   
-  public draw(groundLayer: Container, objectLayer: Container): void {
+  private draw(groundLayer: Container, objectLayer: Container): void {
     // Create base tile graphic
     const tile = new Graphics();
     
