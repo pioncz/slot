@@ -1,3 +1,7 @@
+// ============================================================================
+// 3. Update the player.ts file to support floor navigation
+// ============================================================================
+
 import { Container, Graphics, Text } from 'pixi.js';
 import { Map } from './map';
 import { TILE_HEIGHT, gridToIso } from './lib/map-helpers';
@@ -24,6 +28,7 @@ export class Player {
   private state = {
     gridX: 5,
     gridY: 5,
+    floor: 0, // Add floor level
     x: 0,
     y: 0,
     isMoving: false,
@@ -37,7 +42,12 @@ export class Player {
     down: false,
     left: false,
     right: false,
+    interact: false, // New key for interaction (use stairs)
   };
+
+  // Interaction cooldown timer (prevents rapidly switching floors)
+  private interactionCooldown = 0;
+  private readonly INTERACTION_COOLDOWN_MAX = 30; // About half a second
 
   // Player constants
   readonly PLAYER_WIDTH = 32;
@@ -58,6 +68,7 @@ export class Player {
     // This ensures player is properly aligned with grid cells
     this.state.gridX = validPosition.x;
     this.state.gridY = validPosition.y;
+    this.state.floor = validPosition.floor;
 
     // Calculate isometric coordinates using the helper function
     const isoPos = gridToIso(this.state.gridX, this.state.gridY);
@@ -76,7 +87,7 @@ export class Player {
     this.map.getPlayerLayer().addChild(this.graphic);
 
     console.log(
-      `Player starting at grid position: ${this.state.gridX},${this.state.gridY}`,
+      `Player starting at grid position: ${this.state.gridX},${this.state.gridY} on floor ${this.state.floor}`,
     );
   }
 
@@ -85,7 +96,7 @@ export class Player {
     const debugText = new Text({
       text: `Grid: ${Math.floor(this.state.gridX)},${Math.floor(
         this.state.gridY,
-      )}`,
+      )} F${this.state.floor}`,
       style: {
         fontFamily: 'Arial',
         fontSize: 12,
@@ -125,6 +136,10 @@ export class Player {
       case 'arrowright':
         this.keys.right = true;
         break;
+      case 'e':
+      case ' ':
+        this.keys.interact = true;
+        break;
     }
   }
 
@@ -146,10 +161,19 @@ export class Player {
       case 'arrowright':
         this.keys.right = false;
         break;
+      case 'e':
+      case ' ':
+        this.keys.interact = false;
+        break;
     }
   }
 
   public update(time: any): void {
+    // Decrease interaction cooldown if active
+    if (this.interactionCooldown > 0) {
+      this.interactionCooldown--;
+    }
+    
     // Reset movement flag at the start of each frame
     this.state.isMoving = false;
 
@@ -178,6 +202,30 @@ export class Player {
       this.state.isMoving = true;
     }
 
+    // Check for interaction (stairs usage)
+    if (this.keys.interact && this.interactionCooldown === 0) {
+      const stairsDirection = this.map.checkForStairs(
+        this.state.gridX,
+        this.state.gridY,
+        this.state.floor
+      );
+      
+      if (stairsDirection !== 0) {
+        // Attempt to change floors
+        const newFloor = this.state.floor + stairsDirection;
+        const success = this.map.changeFloor(newFloor);
+        
+        if (success) {
+          this.state.floor = newFloor;
+          
+          // Set cooldown to prevent rapid stair usage
+          this.interactionCooldown = this.INTERACTION_COOLDOWN_MAX;
+          
+          console.log(`Player moved to floor ${this.state.floor}`);
+        }
+      }
+    }
+
     // If there's movement input, move the player
     if (this.state.isMoving) {
       // Determine grid-level movement based on key presses
@@ -190,8 +238,8 @@ export class Player {
       if (moveY > 0) newGridY += this.PLAYER_SPEED;
       if (moveY < 0) newGridY -= this.PLAYER_SPEED;
 
-      // Check if the new grid position is valid
-      if (this.map.isWalkableTile(newGridX, newGridY)) {
+      // Check if the new grid position is valid on the current floor
+      if (this.map.isWalkableTile(newGridX, newGridY, this.state.floor)) {
         // Update grid position
         this.state.gridX = newGridX;
         this.state.gridY = newGridY;
@@ -211,7 +259,7 @@ export class Player {
           const debugText = this.graphic.children[0] as Text;
           debugText.text = `Grid: ${Math.floor(
             this.state.gridX,
-          )},${Math.floor(this.state.gridY)}`;
+          )},${Math.floor(this.state.gridY)} F${this.state.floor}`;
         }
       } else {
         // We hit a wall, stop moving
@@ -225,6 +273,11 @@ export class Player {
     // Update player sprite position
     this.graphic.position.set(this.state.x, this.state.y);
 
+    // Apply vertical offset based on floor level
+    // This ensures the player appears at the correct height on each floor
+    const floorOffset = this.state.floor * (32 + 5); // Match the tile's floor offset
+    this.graphic.position.y -= floorOffset;
+
     // Sort objects by depth for proper rendering
     this.sortObjectsByDepth();
   }
@@ -233,8 +286,9 @@ export class Player {
   private updateGraphics(): void {
     this.graphic.clear();
 
-    // Determine color based on movement
-    const color = this.state.isMoving ? 0xffaa00 : 0xff0000;
+    // Determine color based on floor level
+    const floorColors = [0xff0000, 0xffaa00, 0xffff00, 0x00ff00, 0x00ffff];
+    const color = floorColors[this.state.floor % floorColors.length];
 
     // Draw the isometric character (diamond base with a "body")
     // Important: Draw the player centered at (0,0) within its own Graphics object
@@ -270,6 +324,13 @@ export class Player {
   }
 
   public getScreenY(): number {
-    return this.state.y;
+    // Include floor offset in screen Y position for camera following
+    const floorOffset = this.state.floor * (32 + 5); // Match tile floor offset
+    return this.state.y - floorOffset;
+  }
+  
+  // Get the player's current floor
+  public getCurrentFloor(): number {
+    return this.state.floor;
   }
 }
