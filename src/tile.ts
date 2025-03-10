@@ -63,7 +63,6 @@ export class Tile {
     }
 
     // Draw the isometric tile (diamond shape)
-    tile.clear();
     tile.moveTo(TILE_WIDTH / 2, 0);
     tile.lineTo(TILE_WIDTH, TILE_HEIGHT / 2);
     tile.lineTo(TILE_WIDTH / 2, TILE_HEIGHT);
@@ -78,7 +77,7 @@ export class Tile {
 
     // For walls and objects, add a "depth" component
     if (this.type === TileType.Wall) {
-      // this.drawWall(objectLayer);
+      this.drawWall(objectLayer);
     } else if (this.type === TileType.Water) {
       this.drawWater(objectLayer);
     }
@@ -92,22 +91,29 @@ export class Tile {
   private drawWall(objectLayer: Container): void {
     const wall = new Graphics();
 
-    // Wall side
-    wall.clear();
-    wall.moveTo(0, TILE_HEIGHT / 2);
-    wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT);
-    wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT + TILE_DEPTH);
-    wall.lineTo(0, TILE_HEIGHT / 2 + TILE_DEPTH);
+    // Wall top (same as the base tile, but slightly elevated)
+    wall.moveTo(TILE_WIDTH / 2, 0 - TILE_DEPTH);
+    wall.lineTo(TILE_WIDTH, TILE_HEIGHT / 2 - TILE_DEPTH);
+    wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT - TILE_DEPTH);
+    wall.lineTo(0, TILE_HEIGHT / 2 - TILE_DEPTH);
     wall.closePath();
-    wall.fill({ color: 0x606060 }); // Slightly darker for the wall face
+    wall.fill({ color: 0x909090 }); // Lighter for the top
 
-    // Wall face
-    wall.moveTo(TILE_WIDTH / 2, TILE_HEIGHT);
-    wall.lineTo(TILE_WIDTH, TILE_HEIGHT / 2);
-    wall.lineTo(TILE_WIDTH, TILE_HEIGHT / 2 + TILE_DEPTH);
-    wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT + TILE_DEPTH);
+    // Left wall face
+    wall.moveTo(0, TILE_HEIGHT / 2 - TILE_DEPTH);
+    wall.lineTo(0, TILE_HEIGHT / 2);
+    wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT);
+    wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT - TILE_DEPTH);
     wall.closePath();
-    wall.fill({ color: 0x707070 });
+    wall.fill({ color: 0x606060 }); // Darker for the sides
+
+    // Right wall face
+    wall.moveTo(TILE_WIDTH / 2, TILE_HEIGHT - TILE_DEPTH);
+    wall.lineTo(TILE_WIDTH / 2, TILE_HEIGHT);
+    wall.lineTo(TILE_WIDTH, TILE_HEIGHT / 2);
+    wall.lineTo(TILE_WIDTH, TILE_HEIGHT / 2 - TILE_DEPTH);
+    wall.closePath();
+    wall.fill({ color: 0x707070 }); // Medium for the right side
 
     // Position the wall
     wall.position.set(this.screenX, this.screenY);
