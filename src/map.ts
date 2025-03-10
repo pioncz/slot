@@ -111,14 +111,25 @@ export class Map {
 
   // Find first walkable tile (used for initialization)
   public findFirstWalkableTile(): { x: number; y: number } {
+    let returnX = 1;
+    let returnY = 1;
+    let found = false;
+
     for (let y = 1; y < this.WORLD_MAP.length - 1; y++) {
       for (let x = 1; x < this.WORLD_MAP[y].length - 1; x++) {
         if (this.WORLD_MAP[y][x] === 0) {
-          return { x, y };
+          returnX = x;
+          returnY = y;
+          found = true;
+          break;
         }
       }
+
+      if (found) {
+        break;
+      }
     }
-    // Fallback - should never happen with the current map
-    return { x: 1, y: 1 };
+
+    return { x: returnX + 0.5, y: returnY + 0.5 };
   }
 }
