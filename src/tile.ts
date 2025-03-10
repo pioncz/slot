@@ -1,4 +1,4 @@
-import { Container, Graphics, Text, TextStyle } from 'pixi.js';
+import { Container, Graphics, Text } from 'pixi.js';
 import {
   gridToIso,
   TILE_WIDTH,
@@ -12,6 +12,15 @@ export enum TileType {
   Water = 2,
 }
 
+export interface TileOptions {
+  gridX: number;
+  gridY: number;
+  type: TileType;
+  groundLayer: Container;
+  objectLayer: Container;
+  debug?: boolean;
+}
+
 export class Tile {
   private gridX: number;
   private gridY: number;
@@ -20,26 +29,19 @@ export class Tile {
   private screenY: number;
   private debug: boolean;
 
-  constructor(
-    gridX: number,
-    gridY: number,
-    type: TileType,
-    groundLayer: Container,
-    objectLayer: Container,
-    debug: boolean = false
-  ) {
-    this.gridX = gridX;
-    this.gridY = gridY;
-    this.type = type;
-    this.debug = debug;
+  constructor(options: TileOptions) {
+    this.gridX = options.gridX;
+    this.gridY = options.gridY;
+    this.type = options.type;
+    this.debug = options.debug || false;
 
     // Calculate screen (isometric) coordinates using helper function
-    const { x, y } = gridToIso(gridX, gridY);
+    const { x, y } = gridToIso(this.gridX, this.gridY);
     this.screenX = x;
     this.screenY = y;
 
     // Draw the tile immediately after being created
-    this.draw(groundLayer, objectLayer);
+    this.draw(options.groundLayer, options.objectLayer);
   }
 
   private draw(groundLayer: Container, objectLayer: Container): void {

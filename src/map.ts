@@ -2,6 +2,10 @@ import { Container } from 'pixi.js';
 import { Tile, TileType } from './tile';
 import { gridToIso, isoToGrid, TILE_HEIGHT } from './lib/map-helpers';
 
+export interface MapOptions {
+  worldContainer: Container;
+}
+
 export class Map {
   private groundLayer: Container;
   private objectLayer: Container;
@@ -32,16 +36,16 @@ export class Map {
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ];
 
-  constructor(worldContainer: Container) {
+  constructor(options: MapOptions) {
     // Create layers
     this.groundLayer = new Container();
     this.objectLayer = new Container();
     this.playerLayer = new Container();
 
     // Add layers to the world container
-    worldContainer.addChild(this.groundLayer);
-    worldContainer.addChild(this.objectLayer);
-    worldContainer.addChild(this.playerLayer);
+    options.worldContainer.addChild(this.groundLayer);
+    options.worldContainer.addChild(this.objectLayer);
+    options.worldContainer.addChild(this.playerLayer);
   }
 
   public draw(): void {
@@ -70,32 +74,16 @@ export class Map {
         }
 
         // Create a new tile and have it draw itself immediately
-        this.tiles[y][x] = new Tile(
-          x,
-          y,
-          tileType,
-          this.groundLayer,
-          this.objectLayer,
-          true,
-        );
+        this.tiles[y][x] = new Tile({
+          gridX: x,
+          gridY: y,
+          type: tileType,
+          groundLayer: this.groundLayer,
+          objectLayer: this.objectLayer,
+          debug: true
+        });
       }
     }
-  }
-
-  // Pass through the utility function for isometric conversion
-  public gridToIso(
-    gridX: number,
-    gridY: number,
-  ): { x: number; y: number } {
-    return gridToIso(gridX, gridY);
-  }
-
-  // Pass through the utility function for grid conversion
-  public isoToGrid(
-    x: number,
-    y: number,
-  ): { gridX: number; gridY: number } {
-    return isoToGrid(x, y);
   }
 
   // Check if a tile is walkable
@@ -123,7 +111,7 @@ export class Map {
   }
 
   // For accessing TILE_HEIGHT in Player class
-  public get TILE_HEIGHT(): number {
+  public get tileHeight(): number {
     return TILE_HEIGHT;
   }
 
@@ -138,5 +126,21 @@ export class Map {
     }
     // Fallback - should never happen with the current map
     return { x: 1, y: 1 };
+  }
+
+  // Pass through the utility function for isometric conversion
+  public gridToIso(
+    gridX: number,
+    gridY: number,
+  ): { x: number; y: number } {
+    return gridToIso(gridX, gridY);
+  }
+
+  // Pass through the utility function for grid conversion
+  public isoToGrid(
+    x: number,
+    y: number,
+  ): { gridX: number; gridY: number } {
+    return isoToGrid(x, y);
   }
 }

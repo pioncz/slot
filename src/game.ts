@@ -35,8 +35,14 @@ export class Game {
     this.app.stage.addChild(this.worldContainer);
 
     // Create map and player instances
-    this.map = new Map(this.worldContainer);
-    this.player = new Player(this.worldContainer, this.map);
+    this.map = new Map({ 
+      worldContainer: this.worldContainer 
+    });
+    
+    this.player = new Player({ 
+      worldContainer: this.worldContainer,
+      map: this.map 
+    });
 
     // Draw the map
     this.map.draw();

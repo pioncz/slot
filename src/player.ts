@@ -10,6 +10,11 @@ enum Direction {
   West = 'west',
 }
 
+export interface PlayerOptions {
+  worldContainer: Container;
+  map: Map;
+}
+
 export class Player {
   private container: Container;
   private map: Map;
@@ -39,9 +44,9 @@ export class Player {
   readonly PLAYER_HEIGHT = 48;
   readonly PLAYER_SPEED = 0.1;
 
-  constructor(worldContainer: Container, map: Map) {
-    this.container = worldContainer;
-    this.map = map;
+  constructor(options: PlayerOptions) {
+    this.container = options.worldContainer;
+    this.map = options.map;
     this.graphic = new Graphics();
   }
 
