@@ -54,18 +54,3 @@ body {
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
-
-/* Media queries for different screen sizes */
-@media (max-width: 768px) {
-  #app canvas {
-    max-width: 95%;
-    max-height: 95%;
-  }
-}
-
-@media (orientation: portrait) and (max-width: 480px) {
-  #app canvas {
-    max-width: 98%;
-    max-height: 70%;
-  }
-}

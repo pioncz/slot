@@ -1,5 +1,6 @@
 import { Container } from 'pixi.js';
 import { Tile, TileType } from './tile';
+import WORLD_MAP from './data/world.json';
 
 export interface MapOptions {
   worldContainer: Container;
@@ -19,897 +20,6 @@ export class Map {
   // Keep track of current floor the player is on
   private currentFloor: number = 0;
 
-  // Multi-dimensional map data: [floor][y][x] = [tileType, hasStairs, stairsDirection]
-  // stairsDirection: 1 = up, -1 = down, 0 = no stairs
-  private readonly WORLD_MAP: [number, boolean, number][][][] = [
-    // Floor 0 (Ground Level)
-    [
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [2, false, 0],
-        [2, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [2, false, 0],
-        [2, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [2, false, 0],
-        [2, false, 0],
-        [2, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, true, 1],
-        [2, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [2, false, 0],
-        [2, false, 0],
-        [2, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-    ],
-    // Floor 1 (Upper level floor)
-    [
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, true, -1],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [0, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-      [
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-        [1, false, 0],
-      ],
-    ],
-  ];
-
   // Tiles storage per floor
   private tiles: Tile[][][] = [];
 
@@ -926,7 +36,7 @@ export class Map {
     };
 
     // Create containers for additional floors
-    for (let floor = 1; floor < this.WORLD_MAP.length; floor++) {
+    for (let floor = 1; floor < WORLD_MAP.floors.length; floor++) {
       const floorGround = new Container();
       const floorObjects = new Container();
 
@@ -938,7 +48,7 @@ export class Map {
     }
 
     // Add layers to the world container in the correct order (bottom to top)
-    for (let floor = 0; floor < this.WORLD_MAP.length; floor++) {
+    for (let floor = 0; floor < WORLD_MAP.floors.length; floor++) {
       options.worldContainer.addChild(
         this.floorContainers[floor].ground,
       );
@@ -951,9 +61,9 @@ export class Map {
     options.worldContainer.addChild(this.playerLayer);
 
     // Initialize tiles array for each floor
-    for (let floor = 0; floor < this.WORLD_MAP.length; floor++) {
+    for (let floor = 0; floor < WORLD_MAP.floors.length; floor++) {
       this.tiles[floor] = [];
-      for (let y = 0; y < this.WORLD_MAP[floor].length; y++) {
+      for (let y = 0; y < WORLD_MAP.floors[floor].length; y++) {
         this.tiles[floor][y] = [];
       }
     }
@@ -966,12 +76,12 @@ export class Map {
 
   private createTiles(): void {
     // Create tiles for each floor
-    for (let floor = 0; floor < this.WORLD_MAP.length; floor++) {
-      for (let y = 0; y < this.WORLD_MAP[floor].length; y++) {
-        for (let x = 0; x < this.WORLD_MAP[floor][y].length; x++) {
+    for (let floor = 0; floor < WORLD_MAP.floors.length; floor++) {
+      for (let y = 0; y < WORLD_MAP.floors[floor].length; y++) {
+        for (let x = 0; x < WORLD_MAP.floors[floor][y].length; x++) {
           // Get tile data
           const [tileType, hasStairs, stairsDirection] =
-            this.WORLD_MAP[floor][y][x];
+            WORLD_MAP.floors[floor][y][x];
 
           // Skip drawing tiles for upper floors that are empty space (not walls)
           // This allows us to see through to lower floors
@@ -1040,16 +150,16 @@ export class Map {
     // Check bounds
     if (
       tileX < 0 ||
-      tileX >= this.WORLD_MAP[currentFloor][0].length ||
+      tileX >= WORLD_MAP.floors[currentFloor][0].length ||
       tileY < 0 ||
-      tileY >= this.WORLD_MAP[currentFloor].length
+      tileY >= WORLD_MAP.floors[currentFloor].length
     ) {
       return 0;
     }
 
     // Get tile data
     const [_, hasStairs, stairsDirection] =
-      this.WORLD_MAP[currentFloor][tileY][tileX];
+      WORLD_MAP.floors[currentFloor][tileY][tileX];
 
     // Return stairs direction if player is on stairs
     return hasStairs ? stairsDirection : 0;
@@ -1058,7 +168,7 @@ export class Map {
   // Change player floor level
   public changeFloor(newFloor: number): boolean {
     // Validate new floor
-    if (newFloor < 0 || newFloor >= this.WORLD_MAP.length) {
+    if (newFloor < 0 || newFloor >= WORLD_MAP.floors.length) {
       return false;
     }
 
@@ -1094,16 +204,16 @@ export class Map {
       // Check bounds
       if (
         checkX < 0 ||
-        checkX >= this.WORLD_MAP[currentFloor][0].length ||
+        checkX >= WORLD_MAP.floors[currentFloor][0].length ||
         checkY < 0 ||
-        checkY >= this.WORLD_MAP[currentFloor].length
+        checkY >= WORLD_MAP.floors[currentFloor].length
       ) {
         return false;
       }
 
       // If any corner is in a non-walkable tile, return false (tile type 0 is walkable)
       const [tileType, _, __] =
-        this.WORLD_MAP[currentFloor][checkY][checkX];
+        WORLD_MAP.floors[currentFloor][checkY][checkX];
       if (tileType !== 0) {
         return false;
       }
@@ -1123,9 +233,13 @@ export class Map {
     let returnY = 1;
     let found = false;
 
-    for (let y = 1; y < this.WORLD_MAP[floor].length - 1; y++) {
-      for (let x = 1; x < this.WORLD_MAP[floor][y].length - 1; x++) {
-        const [tileType, _, __] = this.WORLD_MAP[floor][y][x];
+    for (let y = 1; y < WORLD_MAP.floors[floor].length - 1; y++) {
+      for (
+        let x = 1;
+        x < WORLD_MAP.floors[floor][y].length - 1;
+        x++
+      ) {
+        const [tileType, _, __] = WORLD_MAP.floors[floor][y][x];
         if (tileType === 0) {
           returnX = x;
           returnY = y;
@@ -1155,22 +269,22 @@ export class Map {
   // Add a new method to add a floor
   public addNewFloor(): number {
     // Create a new floor based on a template (copy of floor 1 structure)
-    const newFloorIndex = this.WORLD_MAP.length;
+    const newFloorIndex = WORLD_MAP.floors.length;
 
     // Create a template floor (similar to floor 1 but empty)
     const templateFloor: [number, boolean, number][][] = [];
 
     // Copy the structure from floor 1
-    for (let y = 0; y < this.WORLD_MAP[0].length; y++) {
+    for (let y = 0; y < WORLD_MAP.floors[0].length; y++) {
       templateFloor[y] = [];
-      for (let x = 0; x < this.WORLD_MAP[0][y].length; x++) {
+      for (let x = 0; x < WORLD_MAP.floors[0][y].length; x++) {
         // Make all tiles walls by default
         templateFloor[y][x] = [1, false, 0];
       }
     }
 
     // Add the new floor data
-    this.WORLD_MAP.push(templateFloor);
+    WORLD_MAP.floors.push(templateFloor);
 
     // Create containers for the new floor
     const floorGround = new Container();
@@ -1210,13 +324,13 @@ export class Map {
     // Validate input
     if (
       fromFloor < 0 ||
-      fromFloor >= this.WORLD_MAP.length ||
+      fromFloor >= WORLD_MAP.floors.length ||
       toFloor < 0 ||
-      toFloor >= this.WORLD_MAP.length ||
+      toFloor >= WORLD_MAP.floors.length ||
       x < 0 ||
-      x >= this.WORLD_MAP[fromFloor][0].length ||
+      x >= WORLD_MAP.floors[fromFloor][0].length ||
       y < 0 ||
-      y >= this.WORLD_MAP[fromFloor].length
+      y >= WORLD_MAP.floors[fromFloor].length
     ) {
       return false;
     }
@@ -1225,10 +339,10 @@ export class Map {
     const direction = toFloor > fromFloor ? 1 : -1;
 
     // Update the from floor tile to have stairs
-    this.WORLD_MAP[fromFloor][y][x] = [0, true, direction];
+    WORLD_MAP.floors[fromFloor][y][x] = [0, true, direction];
 
     // Update the to floor tile to have stairs in the opposite direction
-    this.WORLD_MAP[toFloor][y][x] = [0, true, -direction];
+    WORLD_MAP.floors[toFloor][y][x] = [0, true, -direction];
 
     // Redraw the tiles
     if (this.tiles[fromFloor][y][x]) {

@@ -1,0 +1,22 @@
+{
+  "tiles": {
+    "0": {
+      "name": "Grass",
+      "walkable": true,
+      "texture": "grass_texture",
+      "color": "0x408040"
+    },
+    "1": {
+      "name": "Wall",
+      "walkable": false,
+      "texture": "wall_texture",
+      "color": "0x808080"
+    },
+    "2": {
+      "name": "Water",
+      "walkable": false,
+      "texture": "water_texture",
+      "color": "0x4040c0"
+    }
+  }
+}
